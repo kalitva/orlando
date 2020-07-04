@@ -21,15 +21,11 @@ void die(const char *s)
     exit(1);
 }
 
-void disable_raw_mode()
-{
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
-}
-
 void enable_raw_mode()
 {
-  tcgetattr(STDIN_FILENO, &orig_termios);
-
+  tcgetattr(STDIN_FILENO, &orig_termios); /* get old terminal settings and */
+                                          /* save them in <orig_termios> */
+  /* set raw_mode */
   struct termios raw_mode = orig_termios;
   
   raw_mode.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
@@ -40,6 +36,11 @@ void enable_raw_mode()
   raw_mode.c_cc[VTIME] = 1;
 
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw_mode);
+}
+
+void disable_raw_mode()
+{
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
 int editor_read_key()
@@ -138,19 +139,12 @@ int get_cursor_position(int *rows, int *cols)
     return 0;
 }
 
-int get_window_size(int *rows, int *cols)
+void get_window_size(int *rows, int *cols)
 {
-    struct winsize ws;
+  struct winsize params;
 
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &params); /* get window parameters */
 
-        if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12)
-            return -1;
-
-        return get_cursor_position(rows, cols);
-    } else {
-        *cols = ws.ws_col;
-        *rows = ws.ws_row;
-        return 0;
-    }
+  *cols = params.ws_col; /* and save them in the global state */
+  *rows = (params.ws_row - 2);
 }

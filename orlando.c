@@ -6,35 +6,32 @@
 #include "data.h"
 
 
-void die(char *);
 void disable_raw_mode();
 void enable_raw_mode();
 int get_window_size(int*, int*);
 void editor_open(char*);
-void editor_refresh_screen();
+void refresh_screen();
 void editor_set_status_message(const char*, ...);
-void editor_process_keypress();
+void process_keypress();
 
+void editor_move_cursor(char);
 
 void init_editor()
 {
-    E.cx = 0;
-    E.cy = 0;
-    E.rx = 0;
-    E.row_offset = 0;
-    E.col_offset = 0;
-    E.num_rows = 0;
-    E.row = NULL;
-    E.dirty = 0;
-    E.file_name = NULL;
-    E.status_msg[0] = '\0';
-    E.status_msg_time = 0;
-    E.syntax = NULL;
+  E.cx = 0;
+  E.cy = 0;
+  E.rx = 0;
+  E.row_offset = 0;
+  E.col_offset = 0;
+  E.num_rows = 0;
+  E.row = NULL;
+  E.dirty = false;
+  E.file_name = NULL;
+  E.status_msg[0] = '\0';
+  E.status_msg_time = 0;
+  E.syntax = NULL;
 
-    if (get_window_size(&E.screen_rows, &E.screen_cols) == -1)
-        die("get_window_size");
-
-    E.screen_rows -= 2;
+  get_window_size(&E.screen_rows, &E.screen_cols);
 }
 
 int main(int argc, char *argv[])
@@ -50,8 +47,8 @@ int main(int argc, char *argv[])
   editor_set_status_message("HELP: Ctrl-S = save | Ctrl-Q = quit");
 
   while (true) {
-      editor_refresh_screen();
-      editor_process_keypress();
+    refresh_screen(); /* output.c */
+    process_keypress(); /* input.c */
   }
   
 }

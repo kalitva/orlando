@@ -1,7 +1,7 @@
 objects = orlando.o terminal.o highlighting.o row_operations.o editor_operations.o file_io.o output.o input.o
 
 orlando: $(objects) data.h
-		$(CC) $(objects) -o orlando -Wall -Wextra -pedantic -std=c99
+		$(CC) $(objects) -g -o orlando -Wall -Wextra -pedantic -std=c99
 
 orlando.o: orlando.c defines.h
 	$(CC) -c orlando.c -include defines.h

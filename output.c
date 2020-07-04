@@ -62,25 +62,7 @@ void editor_draw_rows(struct char_buffer *buffer)
 
         if (file_row >= E.num_rows) {
 
-            if (E.num_rows == 0 && y == E.screen_rows / 3) {
-                char welcome[80];
-                int welcome_len = snprintf(welcome,
-                                           sizeof(welcome),
-                                           "Kilo -- version %s", KILO_VERSION);
-                if (welcome_len > E.screen_cols)
-                    welcome_len = E.screen_cols;
-
-                int padding = (E.screen_cols - welcome_len) / 2;
-                if (padding) {
-                    buf_append(buffer, "~", 1);
-                    padding--;
-                }
-                while (padding--)
-                    buf_append(buffer, " ", 1);
-                buf_append(buffer, welcome, welcome_len);
-            } else {
-                buf_append(buffer, "~", 1);
-            }
+            buf_append(buffer, "~", 1);
 
         } else {
             int len = E.row[file_row].rsize - E.col_offset;
@@ -133,43 +115,39 @@ void editor_draw_rows(struct char_buffer *buffer)
     }
 }
 
-void editor_draw_status_bar(struct char_buffer *buffer)
+void draw_topbar(struct char_buffer *buffer)
 {
-    buf_append(buffer, "\x1b[7m", 4);
+  buf_append(buffer, "\x1b[7m", 4); /* invent colors */
 
-    char status[80];
-    char rstatus[80];
+  char header[20];
+  int space_left_length;
+  int space_right_length;
 
-    int len = snprintf(status,
-                       sizeof(status),
-                       "%.20s - %d lines %s",
-                       E.file_name ? E.file_name : "[No Name]",
-                       E.num_rows,
-                       E.dirty ? "(modified)" : "");
-    int rlen = snprintf(rstatus,
-                        sizeof(rstatus),
-                        "%s | %d/%d",
-                        E.syntax ? E.syntax->file_type : "no ft",
-                        E.cy + 1,
-                        E.num_rows);
+  int header_length = snprintf(header, /* make header */
+                     sizeof(header),
+                     "%.20s%c",
+                     E.file_name ? E.file_name : "[Untitled]",
+                     E.dirty ? '*' : ' ');
 
-    if (len > E.screen_cols)
-        len = E.screen_cols;
+  /* make white spaces around header */
+  space_left_length = (E.screen_cols - header_length) / 2;
+  space_right_length = (E.screen_cols - space_left_length - header_length);
 
-    buf_append(buffer, status, len);
+  char space_left[space_left_length];
+  char space_right[space_right_length];
 
-    while (len < E.screen_cols) {
-        if (E.screen_rows - len == rlen) {
-            buf_append(buffer, status, rlen);
-            break;
-        } else {
-            buf_append(buffer, " ", 1);
-            len++;
-        }
-    }
+  for (int i = 0; i < space_left_length; i++)
+    space_left[i] = ' ';
+  for (int i = 0; i < space_right_length; i++)
+    space_right[i] = ' ';
 
-    buf_append(buffer, "\x1b[m", 3);
-    buf_append(buffer, "\r\n", 2);
+  /* append all */
+  buf_append(buffer, space_left, space_left_length);
+  buf_append(buffer, header, header_length);
+  buf_append(buffer, space_right, space_right_length);
+
+  buf_append(buffer, "\x1b[m", 3); /* invent colors back */
+  buf_append(buffer, "\r\n", 2);
 }
 
 void editor_draw_message_bar(struct char_buffer *buffer)
@@ -182,7 +160,7 @@ void editor_draw_message_bar(struct char_buffer *buffer)
         buf_append(buffer, E.status_msg, msg_len);
 }
 
-void editor_refresh_screen()
+void refresh_screen()
 {
     editor_scroll();
 
@@ -191,15 +169,15 @@ void editor_refresh_screen()
     buf_append(&buffer, "\x1b[?25l", 6);
     buf_append(&buffer, "\x1b[H", 3);
 
+    draw_topbar(&buffer);
     editor_draw_rows(&buffer);
-    editor_draw_status_bar(&buffer);
     editor_draw_message_bar(&buffer);
 
     char buf[32];
     snprintf(buf,
              sizeof(buf),
              "\x1b[%d;%dH",
-             (E.cy - E.row_offset) + 1,
+             (E.cy - E.row_offset) + 2,
              (E.rx - E.col_offset) + 1);
     buf_append(&buffer, buf, strlen(buf));
 

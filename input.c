@@ -6,7 +6,7 @@
 #include "data.h"
 
 
-void editor_refresh_screen();
+void refresh_screen();
 int editor_read_key();
 void editor_insert_new_line();
 void editor_insert_char(int);
@@ -25,7 +25,7 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
 
     while (1) {
         editor_set_status_message(prompt, buf);
-        editor_refresh_screen();
+        refresh_screen();
 
         int ch = editor_read_key();
         if (ch == DEL_KEY || ch == CTRL_KEY('h') || ch == BACKSPACE) {
@@ -95,7 +95,7 @@ void editor_move_cursor(int key)
         E.cx = row_len;
 }
 
-void editor_process_keypress()
+void process_keypress()
 {
     static int quit_times = KILO_QUIT_TIMES;
 

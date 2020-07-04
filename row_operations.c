@@ -121,6 +121,7 @@ void editor_row_insert_char(erow *row, int at, int ch)
 {
     if (at < 0 || at > row->size)
        at = row->size;
+
     row->chars = realloc(row->chars, row->size + 2);
     memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
     row->size++;
