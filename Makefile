@@ -1,24 +1,24 @@
 objects = orlando.o terminal.o highlighting.o row_operations.o editor_operations.o file_io.o output.o input.o
 
-orlando: $(objects) data.h
+orlando: $(objects) src/data.h
 		$(CC) $(objects) -g -o orlando -Wall -Wextra -pedantic -std=c99
 
-orlando.o: orlando.c defines.h
-	$(CC) -c orlando.c -include defines.h
-terminal.o: terminal.c defines.h
-	$(CC) -c terminal.c -include defines.h
-highlighting.o: highlighting.c defines.h
-	$(CC) -c highlighting.c -include defines.h
-row_operations.o: row_operations.c defines.h
-	$(CC) -c row_operations.c -include defines.h 
-editor_operations.o: editor_operations.c defines.h
-	$(CC) -c editor_operations.c -include defines.h
-file_io.o: file_io.c defines.h
-	$(CC) -c file_io.c -include defines.h
-output.o: output.c defines.h
-	$(CC) -c output.c -include defines.h
-input.o: input.c defines.h
-	$(CC) -c input.c -include defines.h
+orlando.o: src/orlando.c src/defines.h
+	$(CC) -c src/orlando.c -include src/defines.h
+terminal.o: src/terminal.c src/defines.h
+	$(CC) -c src/terminal.c -include src/defines.h
+highlighting.o: src/highlighting.c src/defines.h
+	$(CC) -c src/highlighting.c -include src/defines.h
+row_operations.o: src/row_operations.c src/defines.h
+	$(CC) -c src/row_operations.c -include src/defines.h 
+editor_operations.o: src/editor_operations.c src/defines.h
+	$(CC) -c src/editor_operations.c -include src/defines.h
+file_io.o: src/file_io.c src/defines.h
+	$(CC) -c src/file_io.c -include src/defines.h
+output.o: src/output.c src/defines.h
+	$(CC) -c src/output.c -include src/defines.h
+input.o: src/input.c src/defines.h
+	$(CC) -c src/input.c -include src/defines.h
 
 clean:
 	rm $(objects) orlando
