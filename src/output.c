@@ -56,63 +56,79 @@ void editor_scroll()
 
 void editor_draw_rows(struct char_buffer *buffer)
 {
-    int y;
-    for (y = 0; y < E.screen_rows; y++) {
-        int file_row = y + E.row_offset;
+  int file_row;
 
-        if (file_row >= E.num_rows) {
+  for (int y = 0; y < E.screen_rows; y++) {
+    file_row = y + E.row_offset;
 
-            buf_append(buffer, "~", 1);
+    if (file_row >= E.num_rows) { /* if row is empty, insert space */
 
-        } else {
-            int len = E.row[file_row].rsize - E.col_offset;
-            if (len < 0)
-                len = 0;
-            if (len > E.screen_cols)
-                len = E.screen_cols;
-            char *ch = &E.row[file_row].render[E.col_offset];
-            unsigned char *hl = &E.row[file_row].hl[E.col_offset];
-            int current_color = -1;
-            int j;
-            for (j = 0; j < len; j++) {
-                if (iscntrl(ch[j])) {
-                    char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
-                    buf_append(buffer, "\x1b[7m", 4);
-                    buf_append(buffer, &sym, 1);
-                    buf_append(buffer, "\x1b[m", 3);
-                    if (current_color != -1) {
-                        char buf[16];
-                        int clen = snprintf(buf,
-                                            sizeof(buf),
-                                            "\x1b[%dm",
-                                            current_color);
-                        buf_append(buffer, buf, clen);
-                    }
-                } else if (hl[j] == HL_NORMAL) {
-                    if (current_color != -1) {
-                        buf_append(buffer, "\x1b[39m", 5);
-                        current_color = -1;
-                    }
-                    buf_append(buffer, &ch[j], 1);
-                } else {
-                    int color = editor_syntax_to_color(hl[j]);
-                    if (color != current_color) {
-                        current_color = color;
-                        char buf[16];
-                        int clen = snprintf(buf, sizeof(buf),
-                                            "\x1b[%dm",
-                                            color);
-                    buf_append(buffer, buf, clen);
-                    }
-                    buf_append(buffer, &ch[j], 1);
-                }
-            }
-            buf_append(buffer, "\x1b[39m", 5);
-        }
+      buf_append(buffer, " ", 1);
 
-        buf_append(buffer, "\x1b[K", 3);
-        buf_append(buffer, "\r\n", 2);
-    }
+    } else { /* insert number of line */
+
+      char line_number[5]; /* make number */
+      sprintf(line_number, "%3d ", file_row + 1);
+
+      buf_append(buffer, "\x1b[30m", 5); /* color gray */
+      buf_append(buffer, line_number, 4);
+      buf_append(buffer, "\x1b[39m", 5);
+          
+          int len = E.row[file_row].rsize - E.col_offset;
+          if (len < 0)
+              len = 0;
+          if (len > E.screen_cols)
+              len = E.screen_cols;
+          
+          char *ch = &E.row[file_row].render[E.col_offset];
+          unsigned char *hl = &E.row[file_row].hl[E.col_offset];
+          int current_color = -1;
+
+          for (int j = 0; j < len; j++) {
+
+              if (iscntrl(ch[j])) {
+                  char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
+                  buf_append(buffer, &sym, 1);
+
+                  if (current_color != -1) {
+                      char buf[16];
+                      int clen = snprintf(buf,
+                                          sizeof(buf),
+                                          "\x1b[%dm",
+                                          current_color);
+                      buf_append(buffer, buf, clen);
+                  }
+
+              } else if (hl[j] == HL_NORMAL) {
+
+                  if (current_color != -1) {
+                      buf_append(buffer, "\x1b[39m", 5);
+                      current_color = -1;
+                  }
+                  buf_append(buffer, &ch[j], 1);
+
+              } else {
+
+                  int color = editor_syntax_to_color(hl[j]);
+
+                  if (color != current_color) {
+                      current_color = color;
+                      char buf[16];
+                      int clen = snprintf(buf, sizeof(buf),
+                                          "\x1b[%dm",
+                                          color);
+                  buf_append(buffer, buf, clen);
+                  }
+
+                  buf_append(buffer, &ch[j], 1);
+              }
+          }
+          buf_append(buffer, "\x1b[39m", 5);
+      }
+
+      buf_append(buffer, "\x1b[K", 3);
+      buf_append(buffer, "\r\n", 2);
+  }
 }
 
 void draw_topbar(struct char_buffer *buffer)
@@ -178,7 +194,7 @@ void refresh_screen()
              sizeof(buf),
              "\x1b[%d;%dH",
              (E.cy - E.row_offset) + 2,
-             (E.rx - E.col_offset) + 1);
+             (E.rx - E.col_offset) + 5); /* !!!!!!!! replace 5 with offset */
     buf_append(&buffer, buf, strlen(buf));
 
     buf_append(&buffer, "\x1b[?25h", 6);

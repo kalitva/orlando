@@ -2,7 +2,6 @@
 #include <time.h>
 
 
-#define KILO_VERSION "0.0.1"
 #define KILO_TAB_STOP 2
 #define KILO_QUIT_TIMES 1
 

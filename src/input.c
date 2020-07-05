@@ -134,8 +134,10 @@ void process_keypress()
         case BACKSPACE:
         case CTRL_KEY('h'):
         case DEL_KEY:
+
             if (ch == DEL_KEY)
                 editor_move_cursor(ARROW_RIGHT);
+
             editor_del_char();
             break;
 
