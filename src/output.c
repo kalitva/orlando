@@ -54,7 +54,17 @@ void editor_scroll()
         E.col_offset = E.rx - E.screen_cols + 1;
 }
 
-void editor_draw_rows(struct char_buffer *buffer)
+void draw_line_numbers(struct char_buffer *buffer, int line)
+{
+  char line_number[5]; /* make number */
+  sprintf(line_number, "%3d ", line + 1);
+
+  buf_append(buffer, "\x1b[35m", 5); /* color gray */
+  buf_append(buffer, line_number, 4);
+  buf_append(buffer, "\x1b[39m", 5);
+}
+
+void draw_rows(struct char_buffer *buffer)
 {
   int file_row;
 
@@ -63,17 +73,14 @@ void editor_draw_rows(struct char_buffer *buffer)
 
     if (file_row >= E.num_rows) { /* if row is empty, insert space */
 
+      if (y == 0) 
+        draw_line_numbers(buffer, 0);
+
       buf_append(buffer, " ", 1);
 
     } else { /* insert number of line */
+          draw_line_numbers(buffer, file_row);
 
-      char line_number[5]; /* make number */
-      sprintf(line_number, "%3d ", file_row + 1);
-
-      buf_append(buffer, "\x1b[30m", 5); /* color gray */
-      buf_append(buffer, line_number, 4);
-      buf_append(buffer, "\x1b[39m", 5);
-          
           int len = E.row[file_row].rsize - E.col_offset;
           if (len < 0)
               len = 0;
@@ -166,14 +173,28 @@ void draw_topbar(struct char_buffer *buffer)
   buf_append(buffer, "\r\n", 2);
 }
 
-void editor_draw_message_bar(struct char_buffer *buffer)
+void draw_footer(struct char_buffer *buffer)
 {
-    buf_append(buffer, "\x1b[K", 3);
-    int msg_len = strlen(E.status_msg);
-    if (msg_len > E.screen_cols)
-        msg_len = E.screen_cols;
-    if (msg_len && time(NULL) - E.status_msg_time < 5)
-        buf_append(buffer, E.status_msg, msg_len);
+  char cursor[23]; /* make string, that contents line an column nimbers */
+  int cursor_len = snprintf(cursor, 
+              sizeof cursor, 
+              "line: %d column: %d", 
+              E.cy + 1,
+              E.rx + 1);
+  
+  int msg_len = strlen(E.status_msg);
+  
+  int space_len = (E.screen_cols - msg_len - cursor_len); /* empty space */
+  char space[space_len];
+  for (int i = 0; i < space_len; i++)
+    space[i] = ' ';
+
+  buf_append(buffer, "\x1b[7m", 4); /* put in footer */
+  buf_append(buffer, E.status_msg, msg_len);
+  buf_append(buffer, space, space_len - 1);
+  buf_append(buffer, cursor, cursor_len);
+  buf_append(buffer, " ", 1);
+  buf_append(buffer, "\x1b[m", 4);
 }
 
 void refresh_screen()
@@ -186,8 +207,8 @@ void refresh_screen()
     buf_append(&buffer, "\x1b[H", 3);
 
     draw_topbar(&buffer);
-    editor_draw_rows(&buffer);
-    editor_draw_message_bar(&buffer);
+    draw_rows(&buffer);
+    draw_footer(&buffer);
 
     char buf[32];
     snprintf(buf,

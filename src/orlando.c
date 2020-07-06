@@ -32,6 +32,7 @@ void init_editor()
   E.syntax = NULL;
 
   get_window_size(&E.screen_rows, &E.screen_cols);
+  editor_set_status_message(" Quit: Ctrl + 'q' ");
 }
 
 int main(int argc, char *argv[])
@@ -43,8 +44,6 @@ int main(int argc, char *argv[])
     
   if (argc >= 2)
     editor_open(argv[1]);
-
-  editor_set_status_message("HELP: Ctrl-S = save | Ctrl-Q = quit");
 
   while (true) {
     refresh_screen(); /* output.c */

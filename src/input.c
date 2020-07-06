@@ -119,14 +119,17 @@ void process_keypress()
             break;
 
         case CTRL_KEY('s'):
+
             editor_save();
             break;
 
         case HOME_KEY:
+
             E.cx = 0;
             break;
 
         case END_KEY:
+
             if (E.cy < E.num_rows)
                 E.cx = E.row[E.cy].size;
             break;
@@ -173,5 +176,6 @@ void process_keypress()
             editor_insert_char(ch);
             editor_move_cursor(ARROW_RIGHT);
             break;
+
     }
 }
