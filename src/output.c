@@ -13,6 +13,7 @@
 
 int editor_row_cx_to_rx(erow*, int);
 int editor_syntax_to_color(int);
+void get_window_size(int*, int*);
 
 
                                 /*** char buffer ***/
@@ -71,15 +72,15 @@ void draw_rows(struct char_buffer *buffer)
   for (int y = 0; y < E.screen_rows; y++) {
     file_row = y + E.row_offset;
 
-    if (file_row >= E.num_rows) { /* if row is empty, insert space */
+    if (file_row >= E.num_rows) { /* if rows don't fill screen, insert space */
 
       if (y == 0) 
-        draw_line_numbers(buffer, 0);
+        draw_line_numbers(buffer, 0); /* number of line for first row */
 
       buf_append(buffer, " ", 1);
 
-    } else { /* insert number of line */
-          draw_line_numbers(buffer, file_row);
+    } else { 
+          draw_line_numbers(buffer, file_row); /* insert number of line */
 
           int len = E.row[file_row].rsize - E.col_offset;
           if (len < 0)
@@ -189,7 +190,7 @@ void draw_footer(struct char_buffer *buffer)
   for (int i = 0; i < space_len; i++)
     space[i] = ' ';
 
-  buf_append(buffer, "\x1b[7m", 4); /* put in footer */
+  buf_append(buffer, "\x1b[7m", 4); /* put footer in buffer */
   buf_append(buffer, E.status_msg, msg_len);
   buf_append(buffer, space, space_len - 1);
   buf_append(buffer, cursor, cursor_len);
@@ -199,16 +200,18 @@ void draw_footer(struct char_buffer *buffer)
 
 void refresh_screen()
 {
-    editor_scroll();
+  struct char_buffer buffer = BUF_INIT; /* create buffer */
 
-    struct char_buffer buffer = BUF_INIT;
+  get_window_size(&E.screen_rows, &E.screen_cols); /* get screen params */
 
-    buf_append(&buffer, "\x1b[?25l", 6);
+  editor_scroll(); /* move cursor */
+
+    buf_append(&buffer, "\x1b[?25l", 6);  
     buf_append(&buffer, "\x1b[H", 3);
 
-    draw_topbar(&buffer);
-    draw_rows(&buffer);
-    draw_footer(&buffer);
+  draw_topbar(&buffer); /* put all in buffer */
+  draw_rows(&buffer);
+  draw_footer(&buffer);
 
     char buf[32];
     snprintf(buf,
@@ -220,8 +223,8 @@ void refresh_screen()
 
     buf_append(&buffer, "\x1b[?25h", 6);
 
-    write(STDOUT_FILENO, buffer.str, buffer.len);
-    buf_free(&buffer);
+  write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
+  buf_free(&buffer); /* free memory */
 }
 
 void editor_set_status_message(const char *ftime, ...)

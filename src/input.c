@@ -176,6 +176,7 @@ void process_keypress()
             editor_insert_char(ch);
             editor_move_cursor(ARROW_RIGHT);
             break;
-
     }
+
+    refresh_screen();
 }

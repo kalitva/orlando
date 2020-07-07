@@ -8,6 +8,10 @@
 
 #include "data.h"
 
+
+void refresh_screen();
+
+
 struct termios orig_termios;
 struct termios raw_mode;
 
@@ -45,13 +49,11 @@ void disable_raw_mode()
 
 int editor_read_key()
 {
-    int n_read;
-    char ch;
+  int n_read;
+  char ch;
 
-    while ((n_read = read(STDIN_FILENO, &ch, 1)) != 1) {
-        if (n_read == -1 && errno != EAGAIN)
-            die("read");
-    }
+  while ((n_read = read(STDIN_FILENO, &ch, 1)) != 1)
+    refresh_screen(); 
 
     if (ch == '\x1b') {
         char seq[3];
