@@ -39,7 +39,7 @@ enum editor_highlight {
 
 
 struct char_buffer {
-	char *str;
+  char *str;
   int len;
 };
 

@@ -16,7 +16,7 @@
 char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
 char *C_HL_keywords[] = {
     "switch", "if", "while", "for", "break", "continue", "return", "else",
-    "struct", "union", "typedef", "static", "enum", "class", "case",
+    "struct", "union", "typedef", "static", "enum", "class", "case", "#include",
 
     "int|", "long|", "double|", "float|", "char|", "unsigned|", "signed|",
     "void|", NULL
@@ -161,17 +161,17 @@ int editor_syntax_to_color(int hl)
 {
     switch (hl) {
         case HL_COMMENT:
-            return 36;
+            return 30;
         case HL_MLCOMMENT:
-            return 36;
+            return 30;
         case HL_KEYWORD1:
             return 33;
         case HL_KEYWORD2:
-            return 32;
+            return 34;
         case HL_STRING:
-            return 35;
+            return 36;
         case HL_NUMBER:
-            return 31;
+            return 35;
         case HL_MATCH:
             return 34;
         default:

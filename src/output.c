@@ -16,25 +16,22 @@ int editor_syntax_to_color(int);
 void get_window_size(int*, int*);
 
 
-                                /*** char buffer ***/
-
-
-void buf_append(struct char_buffer *buffer, const char *s, int len)
+void buf_append(struct char_buffer *buffer, const char *str, int len)
 {
-    char *new = realloc(buffer->str, buffer->len + len);
+  char *new = realloc(buffer->str, buffer->len + len);
 
-    if (new == NULL)
-        return;
+  if (new == NULL)
+    return;
 
-    memcpy(&new[buffer->len], s, len);
-    buffer->str = new;
-    buffer->len += len;
+  memcpy(&new[buffer->len], str, len);
+  buffer->str = new;
+  buffer->len += len;
 }
 
-void buf_free(struct char_buffer *buffer) {
-    free(buffer->str);
+void buf_free(struct char_buffer *buffer) 
+{
+  free(buffer->str);
 }
-                                /*** ***/
 
 void editor_scroll()
 {
@@ -60,7 +57,7 @@ void draw_line_numbers(struct char_buffer *buffer, int line)
   char line_number[5]; /* make number */
   sprintf(line_number, "%3d ", line + 1);
 
-  buf_append(buffer, "\x1b[35m", 5); /* color gray */
+  buf_append(buffer, "\x1b[30m", 5); /* color gray */
   buf_append(buffer, line_number, 4);
   buf_append(buffer, "\x1b[39m", 5);
 }
@@ -102,40 +99,43 @@ void draw_rows(struct char_buffer *buffer)
                       char buf[16];
                       int clen = snprintf(buf,
                                           sizeof(buf),
-                                          "\x1b[%dm",
+                                           "\x1b[%dm",
                                           current_color);
                       buf_append(buffer, buf, clen);
                   }
 
               } else if (hl[j] == HL_NORMAL) {
 
-                  if (current_color != -1) {
-                      buf_append(buffer, "\x1b[39m", 5);
-                      current_color = -1;
-                  }
-                  buf_append(buffer, &ch[j], 1);
+                if (current_color != -1) {
+                  buf_append(buffer, "\x1b[m", 3);
+                  current_color = -1;
+                }
+
+                buf_append(buffer, &ch[j], 1);
 
               } else {
 
-                  int color = editor_syntax_to_color(hl[j]);
+                if (hl[j] == HL_KEYWORD1 || hl[j] == HL_KEYWORD2)
+                  buf_append(buffer, "\x1b[1m", 4);
 
-                  if (color != current_color) {
-                      current_color = color;
-                      char buf[16];
-                      int clen = snprintf(buf, sizeof(buf),
-                                          "\x1b[%dm",
-                                          color);
+                int color = editor_syntax_to_color(hl[j]);
+
+                if (color != current_color) {
+                  current_color = color;
+                  char buf[16];
+                  int clen = snprintf(buf, sizeof(buf),
+                                      "\x1b[%dm",
+                                      color);
                   buf_append(buffer, buf, clen);
-                  }
+                }
 
                   buf_append(buffer, &ch[j], 1);
               }
           }
-          buf_append(buffer, "\x1b[39m", 5);
       }
 
-      buf_append(buffer, "\x1b[K", 3);
-      buf_append(buffer, "\r\n", 2);
+    buf_append(buffer, "\x1b[K", 3);
+    buf_append(buffer, "\r\n", 2);
   }
 }
 
