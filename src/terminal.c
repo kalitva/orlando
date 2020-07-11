@@ -1,11 +1,4 @@
-#include <ctype.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <termios.h>
-#include <unistd.h>
-
+#include "defines.h"
 #include "data.h"
 
 
@@ -101,17 +94,11 @@ int editor_read_key()
                         return END_KEY;
                 }
             }
-        } else if (seq[0] == '0') {
-            switch (seq[1]) {
-                case 'H':
-                    return HOME_KEY;
-                case 'F':
-                    return END_KEY;
-            }
         }
-
         return '\x1b';
+
     } else {
+      
         return ch;
     }
 }

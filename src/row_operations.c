@@ -3,9 +3,11 @@
 #include <string.h>
 #include <termios.h>
 
+#include "defines.h"
 #include "data.h"
 
 
+/* highlighting */
 void editor_update_syntax(erow*);
 
 
@@ -70,7 +72,7 @@ void editor_update_row(erow *row)
     editor_update_syntax(row);
 }
 
-void editor_insert_row(int at, char *str, size_t len)
+void insert_row(int at, char *str, size_t len)
 {
     if (at < 0 || at > E.num_rows)
         return;

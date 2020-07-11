@@ -1,18 +1,18 @@
-#include <ctype.h>
-#include <stdlib.h>
-#include <termios.h>
-#include <unistd.h>
-
+#include "defines.h"
 #include "data.h"
 
 
+/* output.c */
 void refresh_screen();
+void set_status_message(const char*, ...);
+/* terminal.c */
 int editor_read_key();
+/* editor_operations.c */
 void editor_insert_new_line();
-void editor_insert_char(int);
-void editor_save();
+void insert_char(int);
 void editor_del_char();
-void editor_set_status_message(const char*, ...);
+/* editor file_io.c */
+void editor_save();
 
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
@@ -24,7 +24,7 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
     buf[0] = '\0';
 
     while (1) {
-        editor_set_status_message(prompt, buf);
+        set_status_message(prompt, buf);
         refresh_screen();
 
         int ch = editor_read_key();
@@ -32,14 +32,14 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
             if (buf_len != 0)
                 buf[--buf_len] = '\0';
         } else if (ch == '\x1b') {
-            editor_set_status_message(prompt, buf);
+            set_status_message(prompt, buf);
             if (callback)
                 callback(buf, ch);
             free(buf);
             return NULL;
         } else if (ch == '\r') {
             if (buf_len != 0) {
-                editor_set_status_message("");
+                set_status_message("");
                 if (callback)
                     callback(buf, ch);
                 return buf;
@@ -97,86 +97,87 @@ void editor_move_cursor(int key)
 
 void process_keypress()
 {
-    static int quit_times = KILO_QUIT_TIMES;
+  static int quit_times = KILO_QUIT_TIMES;
 
-    int ch = editor_read_key();
+  int ch = editor_read_key();
 
-    switch (ch) {
-        case '\r':
-            editor_insert_new_line();
-            break;
+  switch (ch) {
 
-        case CTRL_KEY('q'):
-            if (E.dirty && quit_times > 0) {
-                editor_set_status_message("WARNING! File has unsaved changes!",
-                                          quit_times);
-                quit_times--;
-                return;
-            }
-            write(STDOUT_FILENO, "\x1b[2J", 4);
-            write(STDOUT_FILENO, "\x1b[H", 3);
-            exit(0);
-            break;
+    case '\r':
 
-        case CTRL_KEY('s'):
+      editor_insert_new_line();
+      break;
 
-            editor_save();
-            break;
+    case CTRL_KEY('q'):
 
-        case HOME_KEY:
+      if (E.dirty && quit_times > 0) {
+        set_status_message("WARNING! File has unsaved changes!", quit_times);
+          quit_times--;
+          return;
+      }
+      write(STDOUT_FILENO, "\x1b[2J", 4);
+      write(STDOUT_FILENO, "\x1b[H", 3);
+      exit(0);
+      break;
 
-            E.cx = 0;
-            break;
+    case CTRL_KEY('s'):
 
-        case END_KEY:
+      editor_save();
+      break;
 
-            if (E.cy < E.num_rows)
-                E.cx = E.row[E.cy].size;
-            break;
+    case HOME_KEY:
 
-        case BACKSPACE:
-        case CTRL_KEY('h'):
-        case DEL_KEY:
+      E.cx = 0;
+      break;
 
-            if (ch == DEL_KEY)
-                editor_move_cursor(ARROW_RIGHT);
+    case END_KEY:
 
-            editor_del_char();
-            break;
+      if (E.cy < E.num_rows)
+        E.cx = E.row[E.cy].size;
+      break;
 
-        case PAGE_UP:
-        case PAGE_DOWN:
-            {
-                if (ch == PAGE_UP) {
-                    E.cy = E.row_offset;
-                } else if (ch == PAGE_DOWN) {
-                    E.cy = E.row_offset + E.screen_rows - 1;
-                    if (E.cy > E.num_rows)
-                        E.cy = E.num_rows;
-                }
+    case BACKSPACE:
+    case DEL_KEY:
 
-                int times = E.screen_rows;
-                while (times--)
-                    editor_move_cursor(ch == PAGE_UP ? ARROW_UP : ARROW_DOWN);
-            }
-            break;
+      if (ch == DEL_KEY)
+        editor_move_cursor(ARROW_RIGHT);
+      editor_del_char();
+      break;
 
-        case ARROW_UP:
-        case ARROW_DOWN:
-        case ARROW_LEFT:
-        case ARROW_RIGHT:
-            editor_move_cursor(ch);
-            break;
+    case PAGE_UP:
+    case PAGE_DOWN:
 
-        case CTRL_KEY('l'):
-        case '\x1b':
-            break;
+      {
+        if (ch == PAGE_UP) {
+          E.cy = E.row_offset;
+        } else if (ch == PAGE_DOWN) {
+          E.cy = E.row_offset + E.screen_rows - 1;
+            if (E.cy > E.num_rows)
+              E.cy = E.num_rows;
+        }
 
-        default:
-            editor_insert_char(ch);
-            editor_move_cursor(ARROW_RIGHT);
-            break;
-    }
+        int times = E.screen_rows;
+        while (times--)
+          editor_move_cursor(ch == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+      }
+      break;
 
-    refresh_screen();
+    case ARROW_UP:
+    case ARROW_DOWN:
+    case ARROW_LEFT:
+    case ARROW_RIGHT:
+      editor_move_cursor(ch);
+      break;
+
+    case CTRL_KEY('l'):
+    case '\x1b':
+      break;
+
+    default:
+      insert_char(ch);
+      editor_move_cursor(ARROW_RIGHT);
+      break;
+  }
+
+  refresh_screen();
 }

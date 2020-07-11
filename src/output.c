@@ -1,13 +1,4 @@
-#include <ctype.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
-
+#include "defines.h"
 #include "data.h"
 
 
@@ -33,7 +24,7 @@ void buf_free(struct char_buffer *buffer)
   free(buffer->str);
 }
 
-void editor_scroll()
+void scroll()
 {
     E.rx = 0;
     if (E.cy < E.num_rows)
@@ -57,9 +48,10 @@ void draw_line_numbers(struct char_buffer *buffer, int line)
   char line_number[5]; /* make number */
   sprintf(line_number, "%3d ", line + 1);
 
+  buf_append(buffer, "\x1b[m", 3);
   buf_append(buffer, "\x1b[30m", 5); /* color gray */
   buf_append(buffer, line_number, 4);
-  buf_append(buffer, "\x1b[39m", 5);
+  buf_append(buffer, "\x1b[m", 3);
 }
 
 void draw_rows(struct char_buffer *buffer)
@@ -77,62 +69,59 @@ void draw_rows(struct char_buffer *buffer)
       buf_append(buffer, " ", 1);
 
     } else { 
-          draw_line_numbers(buffer, file_row); /* insert number of line */
 
-          int len = E.row[file_row].rsize - E.col_offset;
-          if (len < 0)
-              len = 0;
-          if (len > E.screen_cols)
-              len = E.screen_cols;
+      draw_line_numbers(buffer, file_row); /* insert number of line */
+
+      int len = E.row[file_row].rsize - E.col_offset;
+                                                      /* find row length */
+      if (len < 0)
+        len = 0;
+      if (len > E.screen_cols)
+        len = E.screen_cols;
           
           char *ch = &E.row[file_row].render[E.col_offset];
           unsigned char *hl = &E.row[file_row].hl[E.col_offset];
           int current_color = -1;
 
-          for (int j = 0; j < len; j++) {
+      for (int j = 0; j < len; j++) {
 
-              if (iscntrl(ch[j])) {
-                  char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
-                  buf_append(buffer, &sym, 1);
+        if (iscntrl(ch[j])) {
+          char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
+          buf_append(buffer, &sym, 1);
 
-                  if (current_color != -1) {
-                      char buf[16];
-                      int clen = snprintf(buf,
-                                          sizeof(buf),
-                                           "\x1b[%dm",
-                                          current_color);
-                      buf_append(buffer, buf, clen);
-                  }
-
-              } else if (hl[j] == HL_NORMAL) {
-
-                if (current_color != -1) {
-                  buf_append(buffer, "\x1b[m", 3);
-                  current_color = -1;
-                }
-
-                buf_append(buffer, &ch[j], 1);
-
-              } else {
-
-                if (hl[j] == HL_KEYWORD1 || hl[j] == HL_KEYWORD2)
-                  buf_append(buffer, "\x1b[1m", 4);
-
-                int color = editor_syntax_to_color(hl[j]);
-
-                if (color != current_color) {
-                  current_color = color;
-                  char buf[16];
-                  int clen = snprintf(buf, sizeof(buf),
-                                      "\x1b[%dm",
-                                      color);
-                  buf_append(buffer, buf, clen);
-                }
-
-                  buf_append(buffer, &ch[j], 1);
-              }
+          if (current_color != -1) {
+            char buf[16];
+            int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", current_color);
+            buf_append(buffer, buf, clen);
           }
+
+        } else if (hl[j] == HL_NORMAL) {
+
+          if (current_color != -1) {
+            buf_append(buffer, "\x1b[m", 3);
+            current_color = -1;
+          }
+
+          buf_append(buffer, &ch[j], 1);
+
+        } else {
+
+          if (hl[j] == HL_KEYWORD1 || hl[j] == HL_KEYWORD2)
+            buf_append(buffer, "\x1b[1m", 4);
+
+          int color = editor_syntax_to_color(hl[j]);
+
+          if (color != current_color) {
+            current_color = color;
+            char buf[16];
+            int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", color);
+            buf_append(buffer, buf, clen);
+          }
+
+          buf_append(buffer, &ch[j], 1);
+        }
       }
+    }
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
@@ -204,7 +193,7 @@ void refresh_screen()
 
   get_window_size(&E.screen_rows, &E.screen_cols); /* get screen params */
 
-  editor_scroll(); /* move cursor */
+  scroll(); /* move cursor */
 
     buf_append(&buffer, "\x1b[?25l", 6);  
     buf_append(&buffer, "\x1b[H", 3);
@@ -227,11 +216,10 @@ void refresh_screen()
   buf_free(&buffer); /* free memory */
 }
 
-void editor_set_status_message(const char *ftime, ...)
+void set_status_message(const char *ftime, ...)
 {
     va_list ap;
     va_start(ap, ftime);
     vsnprintf(E.status_msg, sizeof(E.status_msg), ftime, ap);
     va_end(ap);
-    E.status_msg_time = time(NULL);
 }

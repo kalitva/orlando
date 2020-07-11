@@ -1,18 +1,11 @@
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <termios.h>
-#include <unistd.h>
-
+#include "defines.h"
 #include "data.h"
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int));
-void die(char*);
 void editor_select_syntax_highlight();
-void editor_insert_row(int, char*,size_t);
-void editor_set_status_message(const char*, ...);
+/* row operations.c */
+void insert_row(int, char*,size_t);
+void set_status_message(const char*, ...);
 
 
 char *editor_rows_to_string(int *buf_len)
@@ -38,34 +31,33 @@ char *editor_rows_to_string(int *buf_len)
     return buf;
 }
 
-void editor_open(char *file_name)
+void open_file(char *file_name)
 {
-    free(E.file_name);
-    E.file_name = strdup(file_name);
+  E.file_name = strdup(file_name); /* write file-name to global state */
 
-    editor_select_syntax_highlight();
+  editor_select_syntax_highlight();
 
-    FILE *fp = fopen(file_name, "r");
-    if (!fp)
-        die("fopen");
+  FILE *fp = fopen(file_name, "r"); /* open file */
 
-    char* line = NULL;
-    size_t line_cap = 0;
-    ssize_t line_len;
+  if (!fp)
+    fp = fopen(file_name, "w"); /* create file, if don't exit */
+  
+  /* print content */
+  char* line = NULL;
+  size_t line_cap;
+  ssize_t line_len;
 
-    while ((line_len = getline(&line, &line_cap, fp)) != -1) {
+  while ((line_len = getline(&line, &line_cap, fp)) != -1) {
 
-        while (line_len > 0
-                 && (line[line_len - 1] == '\n'
-                    || line[line_len - 1] == '\r'))
-            line_len--;
+    while ((line_len--) > 0
+        && (line[line_len - 1] == '\n' || line[line_len - 1] == '\r'));
 
-        editor_insert_row(E.num_rows, line, line_len);
-    }
+    insert_row(E.num_rows, line, line_len);
+  }
 
-    free(line);
-    fclose(fp);
-    E.dirty = 0;
+  free(line); /* close stream */
+  fclose(fp);
+  E.dirty = false;
 }
 
 void editor_save()
@@ -73,7 +65,7 @@ void editor_save()
     if (E.file_name == NULL) {
         E.file_name = editor_prompt("Save as: %s" "(ESC to cancel)", NULL);
         if (E.file_name == NULL) {
-            editor_set_status_message("Save aborted");
+            set_status_message("Save aborted");
             return;
         }
         editor_select_syntax_highlight();
@@ -89,7 +81,7 @@ void editor_save()
                 close(fd);
                 free(buf);
                 E.dirty = 0;
-                editor_set_status_message("%d bytes written to disk", len);
+                set_status_message("%d bytes written to disk", len);
                 return;
             }
         }
@@ -97,5 +89,5 @@ void editor_save()
     }
 
     free(buf);
-    editor_set_status_message("Can't save! I/O error: %s", strerror(errno));
+    set_status_message("Can't save! I/O error: %s", strerror(errno));
 }
