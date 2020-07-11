@@ -95,6 +95,35 @@ void editor_move_cursor(int key)
         E.cx = row_len;
 }
 
+bool is_pair(int ch)
+{
+  return ch == '{' 
+         || ch == '(' 
+         || ch == '[' 
+         || ch == '<' 
+         || ch == '"' 
+         || ch == '\'';
+}
+
+int find_pair(int ch)
+{
+  switch (ch) {
+    case '{':
+      return '}';
+    case '(':
+      return ')';
+    case '[':
+      return ']';
+    case '<':
+      return '>';
+    case '"':
+    case '\'':
+      return ch;
+  }
+}
+
+static int previous_char;
+
 void process_keypress()
 {
   static int quit_times = KILO_QUIT_TIMES;
@@ -174,8 +203,19 @@ void process_keypress()
       break;
 
     default:
-      insert_char(ch);
-      editor_move_cursor(ARROW_RIGHT);
+                              /* if 'ch' - pair for previous_char, do nothing */
+      if (ch == find_pair(previous_char) && is_pair(previous_char)) { 
+        editor_move_cursor(ARROW_RIGHT);    
+      } else if (is_pair(ch)) { 
+        insert_char(ch);          /* if 'ch' is bracket or quote - add pair */
+        editor_move_cursor(ARROW_RIGHT);
+        insert_char(find_pair(ch));
+      } else {
+        insert_char(ch);      /* just insert character */
+        editor_move_cursor(ARROW_RIGHT);
+      }
+
+      previous_char = ch;
       break;
   }
 
