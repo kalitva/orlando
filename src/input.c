@@ -11,6 +11,7 @@ int editor_read_key();
 void editor_insert_new_line();
 void insert_char(int);
 void editor_del_char();
+void del_row(int);
 /* editor file_io.c */
 void editor_save();
 
@@ -58,7 +59,7 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
     }
 }
 
-void editor_move_cursor(int key)
+void move_cursor(int key)
 {
     erow *row = (E.cy >= E.num_rows) ? NULL : &E.row[E.cy];
 
@@ -132,12 +133,12 @@ void process_keypress()
 
   switch (ch) {
 
-    case '\r':
+    case '\r':                                    /* next line */
 
       editor_insert_new_line();
       break;
 
-    case CTRL_KEY('q'):
+    case CTRL_KEY('q'):                           /* quit */
 
       if (E.dirty && quit_times > 0) {
         set_status_message("WARNING! File has unsaved changes!", quit_times);
@@ -151,29 +152,36 @@ void process_keypress()
 
     case CTRL_KEY('s'):
 
-      editor_save();
+      editor_save();                              /* save */
       break;
 
-    case HOME_KEY:
+    case HOME_KEY:                                /* to start line */
 
       E.cx = 0;
       break;
 
-    case END_KEY:
+    case END_KEY:                                 /* to end line */
 
       if (E.cy < E.num_rows)
         E.cx = E.row[E.cy].size;
       break;
 
-    case BACKSPACE:
-    case DEL_KEY:
+    case CTRL_KEY('d'):
+      del_row(E.cy);
+      move_cursor(ARROW_RIGHT);
 
-      if (ch == DEL_KEY)
-        editor_move_cursor(ARROW_RIGHT);
+    case BACKSPACE:                               /* del character */
+
+      editor_del_char();
+      break;
+      
+    case DEL_KEY:                                 /* del character */
+
+      move_cursor(ARROW_RIGHT);
       editor_del_char();
       break;
 
-    case PAGE_UP:
+    case PAGE_UP:                                 /* pageUp pageDown */
     case PAGE_DOWN:
 
       {
@@ -187,32 +195,31 @@ void process_keypress()
 
         int times = E.screen_rows;
         while (times--)
-          editor_move_cursor(ch == PAGE_UP ? ARROW_UP : ARROW_DOWN);
+          move_cursor(ch == PAGE_UP ? ARROW_UP : ARROW_DOWN);
       }
       break;
 
-    case ARROW_UP:
+    case ARROW_UP:                                /* move cursor */
     case ARROW_DOWN:
     case ARROW_LEFT:
     case ARROW_RIGHT:
-      editor_move_cursor(ch);
+      move_cursor(ch);
       break;
 
-    case CTRL_KEY('l'):
     case '\x1b':
       break;
 
-    default:
+    default:  /* insert character */
                               /* if 'ch' - pair for previous_char, do nothing */
       if (ch == find_pair(previous_char) && is_pair(previous_char)) { 
-        editor_move_cursor(ARROW_RIGHT);    
+        move_cursor(ARROW_RIGHT);    
       } else if (is_pair(ch)) { 
         insert_char(ch);          /* if 'ch' is bracket or quote - add pair */
-        editor_move_cursor(ARROW_RIGHT);
+        move_cursor(ARROW_RIGHT);
         insert_char(find_pair(ch));
       } else {
         insert_char(ch);      /* just insert character */
-        editor_move_cursor(ARROW_RIGHT);
+        move_cursor(ARROW_RIGHT);
       }
 
       previous_char = ch;

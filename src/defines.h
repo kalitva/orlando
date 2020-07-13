@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 
-#define KILO_TAB_STOP 2
+#define TAB 2
 #define KILO_QUIT_TIMES 1
 
 #define CTRL_KEY(k) ((k) & 0x1f)

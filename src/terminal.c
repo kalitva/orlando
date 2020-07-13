@@ -2,6 +2,7 @@
 #include "data.h"
 
 
+/* output.c */
 void refresh_screen();
 
 

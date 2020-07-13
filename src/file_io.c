@@ -1,10 +1,14 @@
 #include "defines.h"
 #include "data.h"
 
+
+/* input.c */
 char *editor_prompt(char *prompt, void (*callback)(char *, int));
+/* highlighting.c */
 void editor_select_syntax_highlight();
-/* row operations.c */
+/* editor.c */
 void insert_row(int, char*,size_t);
+/* output.c */
 void set_status_message(const char*, ...);
 
 
@@ -28,7 +32,7 @@ char *editor_rows_to_string(int *buf_len)
         p++;
     }
 
-    return buf;
+    return buf; 
 }
 
 void open_file(char *file_name)

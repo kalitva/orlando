@@ -45,12 +45,12 @@ void scroll()
 
 void draw_line_numbers(struct char_buffer *buffer, int line)
 {
-  char line_number[5]; /* make number */
-  sprintf(line_number, "%3d ", line + 1);
+  char line_number[6]; /* make number */
+  sprintf(line_number, E.num_rows < 1000 ? "%3d " : "%4d ", line + 1);
 
   buf_append(buffer, "\x1b[m", 3);
   buf_append(buffer, "\x1b[30m", 5); /* color gray */
-  buf_append(buffer, line_number, 4);
+  buf_append(buffer, line_number, 5);
   buf_append(buffer, "\x1b[m", 3);
 }
 
@@ -83,7 +83,7 @@ void draw_rows(struct char_buffer *buffer)
           unsigned char *hl = &E.row[file_row].hl[E.col_offset];
           int current_color = -1;
 
-      for (int j = 0; j < len; j++) {
+      for (int j = 0; j < len; j++) { /* draw line */
 
         if (iscntrl(ch[j])) {
           char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
@@ -104,8 +104,8 @@ void draw_rows(struct char_buffer *buffer)
 
           buf_append(buffer, &ch[j], 1);
 
-        } else {
-
+        } else { /* highilght syntax */
+                                            /* bold font for keywords */
           if (hl[j] == HL_KEYWORD1 || hl[j] == HL_KEYWORD2)
             buf_append(buffer, "\x1b[1m", 4);
 
@@ -137,10 +137,10 @@ void draw_topbar(struct char_buffer *buffer)
   int space_right_length;
 
   int header_length = snprintf(header, /* make header */
-                     sizeof(header),
-                     "%.20s%c",
-                     E.file_name ? E.file_name : "[Untitled]",
-                     E.dirty ? '*' : ' ');
+                               sizeof(header),
+                              "%.20s%c",
+                              E.file_name ? E.file_name : "[Untitled]",
+                              E.dirty ? '*' : ' ');
 
   /* make white spaces around header */
   space_left_length = (E.screen_cols - header_length) / 2;
@@ -158,14 +158,13 @@ void draw_topbar(struct char_buffer *buffer)
   buf_append(buffer, space_left, space_left_length);
   buf_append(buffer, header, header_length);
   buf_append(buffer, space_right, space_right_length);
-
   buf_append(buffer, "\x1b[m", 3); /* invent colors back */
   buf_append(buffer, "\r\n", 2);
 }
 
 void draw_footer(struct char_buffer *buffer)
 {
-  char cursor[23]; /* make string, that contents line an column nimbers */
+  char cursor[23]; /* make string, that contents line and column nimbers */
   int cursor_len = snprintf(cursor, 
               sizeof cursor, 
               "line: %d column: %d", 
@@ -202,15 +201,14 @@ void refresh_screen()
   draw_rows(&buffer);
   draw_footer(&buffer);
 
-    char buf[32];
-    snprintf(buf,
-             sizeof(buf),
-             "\x1b[%d;%dH",
-             (E.cy - E.row_offset) + 2,
-             (E.rx - E.col_offset) + 5); /* !!!!!!!! replace 5 with offset */
-    buf_append(&buffer, buf, strlen(buf));
-
-    buf_append(&buffer, "\x1b[?25h", 6);
+  char buf[16];   /* find cursor position */
+  snprintf(buf,
+           sizeof(buf),
+           "\x1b[%d;%dH",
+           (E.cy - E.row_offset) + 2,
+           (E.rx - E.col_offset) + (E.num_rows < 1000 ? 5 : 6));
+  buf_append(&buffer, buf, strlen(buf));
+  buf_append(&buffer, "\x1b[?25h", 6);
 
   write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
   buf_free(&buffer); /* free memory */
