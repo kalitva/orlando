@@ -7,7 +7,8 @@ void refresh_screen();
 void set_status_message(const char*, ...);
 /* terminal.c */
 int editor_read_key();
-/* editor_operations.c */
+/* editor.c */
+void insert_tab();
 void editor_insert_new_line();
 void insert_char(int);
 void editor_del_char();
@@ -61,39 +62,39 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
 
 void move_cursor(int key)
 {
-    erow *row = (E.cy >= E.num_rows) ? NULL : &E.row[E.cy];
+    Line *row = (E.cursor_Y >= E.num_rows) ? NULL : &row[E.cursor_Y];
 
     switch (key) {
         case ARROW_LEFT:
-            if (E.cx != 0) {
-                E.cx--;
-            } else if (E.cy > 0) {
-                E.cy--;
-                E.cx = E.row[E.cy].size;
+            if (E.cursor_X != 0) {
+                E.cursor_X--;
+            } else if (E.cursor_Y > 0) {
+                E.cursor_Y--;
+                E.cursor_X = row[E.cursor_Y].len;
             }
             break;
         case ARROW_RIGHT:
-            if (row && E.cx < row->size) {
-                E.cx++;
-            } else if (row && E.cx == row->size) {
-                E.cy++;
-                E.cx = 0;
+            if (row && E.cursor_X < row->len) {
+                E.cursor_X++;
+            } else if (row && E.cursor_X == row->len) {
+                E.cursor_Y++;
+                E.cursor_X = 0;
             }
             break;
         case ARROW_UP:
-            if (E.cy != 0)
-                E.cy--;
+            if (E.cursor_Y != 0)
+                E.cursor_Y--;
             break;
         case ARROW_DOWN:
-            if (E.cy < E.num_rows)
-                E.cy++;
+            if (E.cursor_Y < E.num_rows)
+                E.cursor_Y++;
             break;
     }
 
-    row = (E.cy >= E.num_rows) ? NULL : &E.row[E.cy];
-    int row_len = row ? row->size : 0;
-    if (E.cx > row_len)
-        E.cx = row_len;
+    row = (E.cursor_Y >= E.num_rows) ? NULL : &row[E.cursor_Y];
+    int row_len = row ? row->len : 0;
+    if (E.cursor_X > row_len)
+        E.cursor_X = row_len;
 }
 
 bool is_pair(int ch)
@@ -101,7 +102,6 @@ bool is_pair(int ch)
   return ch == '{' 
          || ch == '(' 
          || ch == '[' 
-         || ch == '<' 
          || ch == '"' 
          || ch == '\'';
 }
@@ -115,8 +115,6 @@ int find_pair(int ch)
       return ')';
     case '[':
       return ']';
-    case '<':
-      return '>';
     case '"':
     case '\'':
       return ch;
@@ -138,6 +136,11 @@ void process_keypress()
       editor_insert_new_line();
       break;
 
+    case '\t':
+
+      insert_tab();
+      break;
+
     case CTRL_KEY('q'):                           /* quit */
 
       if (E.dirty && quit_times > 0) {
@@ -157,18 +160,17 @@ void process_keypress()
 
     case HOME_KEY:                                /* to start line */
 
-      E.cx = 0;
+      E.cursor_X = 0;
       break;
 
     case END_KEY:                                 /* to end line */
 
-      if (E.cy < E.num_rows)
-        E.cx = E.row[E.cy].size;
+      if (E.cursor_Y < E.num_rows)
+;//        E.cursor_X = row[E.cursor_Y].size;
       break;
 
     case CTRL_KEY('d'):
-      del_row(E.cy);
-      move_cursor(ARROW_RIGHT);
+      del_row(E.cursor_Y);
 
     case BACKSPACE:                               /* del character */
 
@@ -186,11 +188,11 @@ void process_keypress()
 
       {
         if (ch == PAGE_UP) {
-          E.cy = E.row_offset;
+          E.cursor_Y = E.row_offset;
         } else if (ch == PAGE_DOWN) {
-          E.cy = E.row_offset + E.screen_rows - 1;
-            if (E.cy > E.num_rows)
-              E.cy = E.num_rows;
+          E.cursor_Y = E.row_offset + E.screen_rows - 1;
+            if (E.cursor_Y > E.num_rows)
+              E.cursor_Y   = E.num_rows;
         }
 
         int times = E.screen_rows;
@@ -209,18 +211,9 @@ void process_keypress()
     case '\x1b':
       break;
 
-    default:  /* insert character */
-                              /* if 'ch' - pair for previous_char, do nothing */
-      if (ch == find_pair(previous_char) && is_pair(previous_char)) { 
-        move_cursor(ARROW_RIGHT);    
-      } else if (is_pair(ch)) { 
-        insert_char(ch);          /* if 'ch' is bracket or quote - add pair */
+    default:                                     /* insert character */
+        insert_char(ch); 
         move_cursor(ARROW_RIGHT);
-        insert_char(find_pair(ch));
-      } else {
-        insert_char(ch);      /* just insert character */
-        move_cursor(ARROW_RIGHT);
-      }
 
       previous_char = ch;
       break;

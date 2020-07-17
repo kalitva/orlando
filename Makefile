@@ -1,4 +1,4 @@
-objects = main.o terminal.o highlighting.o editor.o file_io.o output.o input.o
+objects = main.o terminal.o highlighting.o editor.o file_io.o output.o input.o lnklist.o
 
 orlando: $(objects) src/data.h
 		$(CC) $(objects) -g -o orlando -Wall -Wextra -pedantic -std=c99
@@ -17,6 +17,8 @@ output.o: src/output.c src/defines.h
 	$(CC) -c src/output.c
 input.o: src/input.c src/defines.h
 	$(CC) -c src/input.c
+lnklist.o: src/lnklist.c
+	$(CC) -c src/lnklist.c
 
 clean:
 	rm $(objects) orlando

@@ -2,7 +2,6 @@
 #include "data.h"
 
 
-int editor_row_cx_to_rx(erow*, int);
 int editor_syntax_to_color(int);
 void get_window_size(int*, int*);
 
@@ -26,21 +25,17 @@ void buf_free(struct char_buffer *buffer)
 
 void scroll()
 {
-    E.rx = 0;
-    if (E.cy < E.num_rows)
-        E.rx = editor_row_cx_to_rx(&E.row[E.cy], E.cx);
+    if (E.cursor_Y < E.row_offset)
+        E.row_offset = E.cursor_Y;
 
-    if (E.cy < E.row_offset)
-        E.row_offset = E.cy;
+    if (E.cursor_Y >= E.row_offset + E.screen_rows)
+        E.row_offset = E.cursor_Y - E.screen_rows + 1;
 
-    if (E.cy >= E.row_offset + E.screen_rows)
-        E.row_offset = E.cy - E.screen_rows + 1;
+    if (E.cursor_X < E.col_offset)
+        E.col_offset = E.cursor_X;
 
-    if (E.rx < E.col_offset)
-        E.col_offset = E.rx;
-
-    if (E.rx >= E.col_offset + E.screen_cols)
-        E.col_offset = E.rx - E.screen_cols + 1;
+    if (E.cursor_X >= E.col_offset + E.screen_cols)
+        E.col_offset = E.cursor_X - E.screen_cols + 1;
 }
 
 void draw_line_numbers(struct char_buffer *buffer, int line)
@@ -56,72 +51,20 @@ void draw_line_numbers(struct char_buffer *buffer, int line)
 
 void draw_rows(struct char_buffer *buffer)
 {
-  int file_row;
+  for (Node *current = lines->first; current; current = current->next) {
+  	int line_number = 0;
+  	draw_line_numbers(buffer, line_number);	
 
-  for (int y = 0; y < E.screen_rows; y++) {
-    file_row = y + E.row_offset;
+  	Line *line = current->value;
+  	buf_append(buffer, line->str, line->len);
+  }
 
-    if (file_row >= E.num_rows) { /* if rows don't fill screen, insert space */
+  for (int y = lines->size; y < E.screen_rows; y++) {
 
-      if (y == 0) 
-        draw_line_numbers(buffer, 0); /* number of line for first row */
-
+    if (y == 0)
+      draw_line_numbers(buffer, 0);
+    else
       buf_append(buffer, " ", 1);
-
-    } else { 
-
-      draw_line_numbers(buffer, file_row); /* insert number of line */
-
-      int len = E.row[file_row].rsize - E.col_offset;
-                                                      /* find row length */
-      if (len < 0)
-        len = 0;
-      if (len > E.screen_cols)
-        len = E.screen_cols;
-          
-          char *ch = &E.row[file_row].render[E.col_offset];
-          unsigned char *hl = &E.row[file_row].hl[E.col_offset];
-          int current_color = -1;
-
-      for (int j = 0; j < len; j++) { /* draw line */
-
-        if (iscntrl(ch[j])) {
-          char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
-          buf_append(buffer, &sym, 1);
-
-          if (current_color != -1) {
-            char buf[16];
-            int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", current_color);
-            buf_append(buffer, buf, clen);
-          }
-
-        } else if (hl[j] == HL_NORMAL) {
-
-          if (current_color != -1) {
-            buf_append(buffer, "\x1b[m", 3);
-            current_color = -1;
-          }
-
-          buf_append(buffer, &ch[j], 1);
-
-        } else { /* highilght syntax */
-                                            /* bold font for keywords */
-          if (hl[j] == HL_KEYWORD1 || hl[j] == HL_KEYWORD2)
-            buf_append(buffer, "\x1b[1m", 4);
-
-          int color = editor_syntax_to_color(hl[j]);
-
-          if (color != current_color) {
-            current_color = color;
-            char buf[16];
-            int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", color);
-            buf_append(buffer, buf, clen);
-          }
-
-          buf_append(buffer, &ch[j], 1);
-        }
-      }
-    }
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
@@ -139,7 +82,7 @@ void draw_topbar(struct char_buffer *buffer)
   int header_length = snprintf(header, /* make header */
                                sizeof(header),
                               "%.20s%c",
-                              E.file_name ? E.file_name : "[Untitled]",
+                              E.file_name ? E.file_name : "[No Name]",
                               E.dirty ? '*' : ' ');
 
   /* make white spaces around header */
@@ -168,8 +111,8 @@ void draw_footer(struct char_buffer *buffer)
   int cursor_len = snprintf(cursor, 
               sizeof cursor, 
               "line: %d column: %d", 
-              E.cy + 1,
-              E.rx + 1);
+              E.cursor_Y + 1,
+              E.cursor_X + 1);
   
   int msg_len = strlen(E.status_msg);
   
@@ -194,8 +137,8 @@ void refresh_screen()
 
   scroll(); /* move cursor */
 
-    buf_append(&buffer, "\x1b[?25l", 6);  
-    buf_append(&buffer, "\x1b[H", 3);
+//  buf_append(&buffer, "\x1b[?25l", 6);  
+  buf_append(&buffer, "\x1b[H", 3);
 
   draw_topbar(&buffer); /* put all in buffer */
   draw_rows(&buffer);
@@ -205,10 +148,11 @@ void refresh_screen()
   snprintf(buf,
            sizeof(buf),
            "\x1b[%d;%dH",
-           (E.cy - E.row_offset) + 2,
-           (E.rx - E.col_offset) + (E.num_rows < 1000 ? 5 : 6));
+           (E.cursor_Y - E.row_offset) + 2,
+           (E.cursor_X - E.col_offset) + (E.num_rows < 1000 ? 5 : 6));
+
   buf_append(&buffer, buf, strlen(buf));
-  buf_append(&buffer, "\x1b[?25h", 6);
+//  buf_append(&buffer, "\x1b[?25h", 6);
 
   write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
   buf_free(&buffer); /* free memory */

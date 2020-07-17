@@ -7,7 +7,7 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int));
 /* highlighting.c */
 void editor_select_syntax_highlight();
 /* editor.c */
-void insert_row(int, char*,size_t);
+void insert_line(Node *node);
 /* output.c */
 void set_status_message(const char*, ...);
 
@@ -18,7 +18,7 @@ char *editor_rows_to_string(int *buf_len)
     int j;
 
     for (j = 0; j < E.num_rows; j++)
-        total_len += E.row[j].size + 1;
+;//        total_len += text.last->size + 1;
 
     *buf_len = total_len;
 
@@ -26,8 +26,8 @@ char *editor_rows_to_string(int *buf_len)
     char *p = buf;
 
     for (j = 0; j < E.num_rows; j++) {
-        memcpy(p, E.row[j].chars, E.row[j].size);
-        p += E.row[j].size;
+//        memcpy(p, row[j].chars, row[j].size);
+//        p += row[j].size;
         *p = '\n';
         p++;
     }
@@ -56,7 +56,7 @@ void open_file(char *file_name)
     while ((line_len--) > 0
         && (line[line_len - 1] == '\n' || line[line_len - 1] == '\r'));
 
-    insert_row(E.num_rows, line, line_len);
+//    insert_row(E.num_rows, line, line_len);
   }
 
   free(line); /* close stream */

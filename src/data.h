@@ -1,7 +1,5 @@
-struct editor_config E;
+struct Editor_config E;
 
-
-
+List *lines;
 
 // Не открывает файлы с расширениями
-// Количество номеров строк -до тысячи

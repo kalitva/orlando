@@ -11,21 +11,23 @@ void open_file(char*);
 void set_status_message(const char*, ...);
 /* input.c */
 void process_keypress();
+/* lnklist.c */
+List* new_list();
 
 
 void init_editor()
 {
-  E.cx = 0; /* init state */
-  E.cy = 0;
-  E.rx = 0;
+  E.cursor_X = 0; /* init state */
+  E.cursor_Y = 0;
   E.row_offset = 0;
   E.col_offset = 0;
   E.num_rows = 0;
-  E.row = NULL;
   E.dirty = false;
   E.file_name = NULL;
   E.status_msg[0] = '\0';
   E.syntax = NULL;
+
+  lines = new_list();
 
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
   enable_raw_mode();                        /* set terminal */
