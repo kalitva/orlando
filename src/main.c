@@ -3,16 +3,17 @@
 
 
 /* terminal.c */
-void disable_raw_mode();
-void enable_raw_mode();
+void disable_raw_mode(void);
+void enable_raw_mode(void);
 /* file_io.c */
 void open_file(char*);
 /* output.c */
 void set_status_message(const char*, ...);
+void refresh_screen(void);
 /* input.c */
-void process_keypress();
+void process_keypress(void);
 /* lnklist.c */
-List* new_list();
+List* new_list(void);
 
 
 void init_editor()
@@ -30,8 +31,11 @@ void init_editor()
   lines = new_list();
 
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
+
   enable_raw_mode();                        /* set terminal */
   atexit(disable_raw_mode);    
+
+  refresh_screen();
 }
 
 int main(int argc, char *argv[])

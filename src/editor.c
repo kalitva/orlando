@@ -35,6 +35,8 @@ void append_line()
 
 	append_node(lines, line);
 	lines->head = lines->last;
+
+	lines->size++;
 }
 
 void insert_char(int ch)
@@ -44,7 +46,7 @@ void insert_char(int ch)
 
 	Line *head = lines->head->value;
 
-	if (head->len == 0)
+	if (!head->str)
 		head->str = malloc(80);
 
 	head->str[head->len++] = ch;
@@ -63,6 +65,16 @@ void editor_row_del_char(Line *row, int at)
 {
 }
 
-void editor_del_char()
+void delete_char()
 {
+	if (E.cursor_X == 0 && E.cursor_Y == 0) /* abort if editor is empty */
+		return;
+
+	Line *line = lines->head->value;
+
+	for (int i = E.cursor_X - 1; i < line->len; i++) /* move chars to left */
+		line->str[i] = line->str[i + 1];
+
+	line->str[line->len - 1] = 0; /* delete char */
+	line->len--;									/* decrease line length */
 }

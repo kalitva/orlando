@@ -6,12 +6,12 @@
 void refresh_screen();
 void set_status_message(const char*, ...);
 /* terminal.c */
-int editor_read_key();
+int read_key();
 /* editor.c */
 void insert_tab();
 void editor_insert_new_line();
 void insert_char(int);
-void editor_del_char();
+void delete_char(void);
 void del_row(int);
 /* editor file_io.c */
 void editor_save();
@@ -29,7 +29,7 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
         set_status_message(prompt, buf);
         refresh_screen();
 
-        int ch = editor_read_key();
+        int ch = read_key();
         if (ch == DEL_KEY || ch == CTRL_KEY('h') || ch == BACKSPACE) {
             if (buf_len != 0)
                 buf[--buf_len] = '\0';
@@ -62,48 +62,24 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
 
 void move_cursor(int key)
 {
-    Line *row = (E.cursor_Y >= E.num_rows) ? NULL : &row[E.cursor_Y];
+  Line *line = (lines->head) ? lines->head->value : NULL;
 
-    switch (key) {
-        case ARROW_LEFT:
-            if (E.cursor_X != 0) {
-                E.cursor_X--;
-            } else if (E.cursor_Y > 0) {
-                E.cursor_Y--;
-                E.cursor_X = row[E.cursor_Y].len;
-            }
-            break;
-        case ARROW_RIGHT:
-            if (row && E.cursor_X < row->len) {
-                E.cursor_X++;
-            } else if (row && E.cursor_X == row->len) {
-                E.cursor_Y++;
-                E.cursor_X = 0;
-            }
-            break;
-        case ARROW_UP:
-            if (E.cursor_Y != 0)
-                E.cursor_Y--;
-            break;
-        case ARROW_DOWN:
-            if (E.cursor_Y < E.num_rows)
-                E.cursor_Y++;
-            break;
-    }
+  switch (key) {
+    
+    case ARROW_RIGHT:
+      E.cursor_X++;
+      break;
 
-    row = (E.cursor_Y >= E.num_rows) ? NULL : &row[E.cursor_Y];
-    int row_len = row ? row->len : 0;
-    if (E.cursor_X > row_len)
-        E.cursor_X = row_len;
+    case ARROW_LEFT:
+      if (E.cursor_X > 0)
+        E.cursor_X--;
+      break;
+  }
 }
 
 bool is_pair(int ch)
 {
-  return ch == '{' 
-         || ch == '(' 
-         || ch == '[' 
-         || ch == '"' 
-         || ch == '\'';
+  return ch == '{' || ch == '(' || ch == '[' || ch == '"' || ch == '\'';
 }
 
 int find_pair(int ch)
@@ -121,13 +97,19 @@ int find_pair(int ch)
   }
 }
 
-static int previous_char;
+void print_content()
+{
+  for (Node *current = lines->first; current; current = current->next) {
+    Line *line = current->value;
+    printf("%s\n", line->str);
+  }
+}
 
 void process_keypress()
 {
   static int quit_times = KILO_QUIT_TIMES;
 
-  int ch = editor_read_key();
+  int ch = read_key();
 
   switch (ch) {
 
@@ -150,6 +132,7 @@ void process_keypress()
       }
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
+      //print_content();
       exit(0);
       break;
 
@@ -174,13 +157,15 @@ void process_keypress()
 
     case BACKSPACE:                               /* del character */
 
-      editor_del_char();
+      delete_char();
+      move_cursor(ARROW_LEFT);
       break;
       
     case DEL_KEY:                                 /* del character */
 
       move_cursor(ARROW_RIGHT);
-      editor_del_char();
+      delete_char();
+      move_cursor(ARROW_LEFT);
       break;
 
     case PAGE_UP:                                 /* pageUp pageDown */
@@ -215,7 +200,6 @@ void process_keypress()
         insert_char(ch); 
         move_cursor(ARROW_RIGHT);
 
-      previous_char = ch;
       break;
   }
 

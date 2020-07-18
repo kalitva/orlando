@@ -2,7 +2,7 @@
 #include "data.h"
 
 
-int editor_syntax_to_color(int);
+/* terminal.c */
 void get_window_size(int*, int*);
 
 
@@ -51,12 +51,16 @@ void draw_line_numbers(struct char_buffer *buffer, int line)
 
 void draw_rows(struct char_buffer *buffer)
 {
+  int line_number = 0;
+
   for (Node *current = lines->first; current; current = current->next) {
-  	int line_number = 0;
-  	draw_line_numbers(buffer, line_number);	
+  	draw_line_numbers(buffer, E.cursor_Y);	
 
   	Line *line = current->value;
   	buf_append(buffer, line->str, line->len);
+
+    buf_append(buffer, "\x1b[K", 3);
+    buf_append(buffer, "\r\n\r\n", 4);
   }
 
   for (int y = lines->size; y < E.screen_rows; y++) {
@@ -64,7 +68,7 @@ void draw_rows(struct char_buffer *buffer)
     if (y == 0)
       draw_line_numbers(buffer, 0);
     else
-      buf_append(buffer, " ", 1);
+      buf_append(buffer, "", 1);
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
@@ -81,9 +85,9 @@ void draw_topbar(struct char_buffer *buffer)
 
   int header_length = snprintf(header, /* make header */
                                sizeof(header),
-                              "%.20s%c",
-                              E.file_name ? E.file_name : "[No Name]",
-                              E.dirty ? '*' : ' ');
+                               "%.20s%c",
+                               E.file_name ? E.file_name : "[No Name]",
+                               E.dirty ? '*' : ' ');
 
   /* make white spaces around header */
   space_left_length = (E.screen_cols - header_length) / 2;
@@ -135,7 +139,7 @@ void refresh_screen()
 
   get_window_size(&E.screen_rows, &E.screen_cols); /* get screen params */
 
-  scroll(); /* move cursor */
+//  scroll(); /* move cursor */
 
 //  buf_append(&buffer, "\x1b[?25l", 6);  
   buf_append(&buffer, "\x1b[H", 3);
