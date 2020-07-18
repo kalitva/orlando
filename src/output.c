@@ -38,10 +38,10 @@ void scroll()
         E.col_offset = E.cursor_X - E.screen_cols + 1;
 }
 
-void draw_line_numbers(struct char_buffer *buffer, int line)
+void print_line_numbers(struct char_buffer *buffer, int line)
 {
   char line_number[6]; /* make number */
-  sprintf(line_number, E.num_rows < 1000 ? "%3d " : "%4d ", line + 1);
+  sprintf(line_number, E.num_rows < 1000 ? "%3d " : "%4d ", line);
 
   buf_append(buffer, "\x1b[m", 3);
   buf_append(buffer, "\x1b[30m", 5); /* color gray */
@@ -49,12 +49,12 @@ void draw_line_numbers(struct char_buffer *buffer, int line)
   buf_append(buffer, "\x1b[m", 3);
 }
 
-void draw_rows(struct char_buffer *buffer)
+void print_lines(struct char_buffer *buffer)
 {
-  int line_number = 0;
+  int line_number = 1;
 
   for (Node *current = lines->first; current; current = current->next) {
-  	draw_line_numbers(buffer, E.cursor_Y);	
+  	print_line_numbers(buffer, line_number++);	
 
   	Line *line = current->value;
   	buf_append(buffer, line->str, line->len);
@@ -63,12 +63,10 @@ void draw_rows(struct char_buffer *buffer)
     buf_append(buffer, "\r\n\r\n", 4);
   }
 
+  /* fill empty space */
   for (int y = lines->size; y < E.screen_rows; y++) {
 
-    if (y == 0)
-      draw_line_numbers(buffer, 0);
-    else
-      buf_append(buffer, "", 1);
+  (y == 0) ? print_line_numbers(buffer, 1) : buf_append(buffer, "", 1);
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
@@ -141,11 +139,10 @@ void refresh_screen()
 
 //  scroll(); /* move cursor */
 
-//  buf_append(&buffer, "\x1b[?25l", 6);  
   buf_append(&buffer, "\x1b[H", 3);
 
   draw_topbar(&buffer); /* put all in buffer */
-  draw_rows(&buffer);
+  print_lines(&buffer);
   draw_footer(&buffer);
 
   char buf[16];   /* find cursor position */
@@ -156,10 +153,9 @@ void refresh_screen()
            (E.cursor_X - E.col_offset) + (E.num_rows < 1000 ? 5 : 6));
 
   buf_append(&buffer, buf, strlen(buf));
-//  buf_append(&buffer, "\x1b[?25h", 6);
 
   write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
-  buf_free(&buffer); /* free memory */
+  buf_free(&buffer); /* free buffer */
 }
 
 void set_status_message(const char *ftime, ...)

@@ -101,7 +101,7 @@ void print_content()
 {
   for (Node *current = lines->first; current; current = current->next) {
     Line *line = current->value;
-    printf("%s\n", line->str);
+    printf("%s %lu\n", line->str, strlen(line->str));
   }
 }
 
@@ -132,7 +132,7 @@ void process_keypress()
       }
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
-      //print_content();
+//      print_content();
       exit(0);
       break;
 
@@ -197,8 +197,8 @@ void process_keypress()
       break;
 
     default:                                     /* insert character */
-        insert_char(ch); 
-        move_cursor(ARROW_RIGHT);
+      insert_char(ch); 
+      move_cursor(ARROW_RIGHT);
 
       break;
   }

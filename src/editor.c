@@ -32,6 +32,7 @@ void row_insert_char(Line *row, int at, int ch)
 void append_line()
 {
 	Line *line = malloc(sizeof(Line));
+	line->capacity = 80;
 
 	append_node(lines, line);
 	lines->head = lines->last;
@@ -41,15 +42,29 @@ void append_line()
 
 void insert_char(int ch)
 {
-	if (is_empty(lines))
+	if (is_empty(lines))	/* if lines is empty create new line */
 		append_line();
 
-	Line *head = lines->head->value;
+	Line *line = lines->head->value;
 
-	if (!head->str)
-		head->str = malloc(80);
+	if (!line->str)			/* get memory */
+		line->str = malloc(sizeof(int) * line->capacity);
 
-	head->str[head->len++] = ch;
+	if (line->len > line->capacity - 1) { /* increase memory */
+		line->capacity *= 1.5;
+		line->str = realloc(line->str, line->capacity * sizeof(int));
+	}
+
+	if (E.cursor_X == line->len) {	/* append char and return */
+		line->str[line->len++] = ch;
+		return;
+	}
+
+	for (int i = line->len - 1; i >= E.cursor_X; i--) /* or move chars to right */
+		line->str[i + 1] = line->str[i];
+
+	line->str[E.cursor_X] = ch;										/* and insert char */
+	line->len++;								/*increase sring length */
 }
 
 void insert_tab()

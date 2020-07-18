@@ -28,7 +28,7 @@ void init_editor()
   E.status_msg[0] = '\0';
   E.syntax = NULL;
 
-  lines = new_list();
+  lines = new_list(); /* global variable for text */
 
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
 

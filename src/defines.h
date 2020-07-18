@@ -54,7 +54,7 @@ struct char_buffer {
 };
 
 typedef struct {
-  int idx;
+  int capacity;
   int len;
   char *str;
 } Line;
