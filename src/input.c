@@ -8,13 +8,14 @@ void set_status_message(const char*, ...);
 /* terminal.c */
 int read_key();
 /* editor.c */
-void insert_tab();
-void editor_insert_new_line();
 void insert_char(int);
 void delete_char(void);
-void del_row(int);
+void insert_line(void);
 /* editor file_io.c */
 void editor_save();
+/* lnklist.c */
+void head_to_next(t_list*);
+void head_to_previous(t_list*);
 
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
@@ -60,21 +61,49 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
     }
 }
 
-void move_cursor(int key)
+void cursor_to_up()
 {
-  t_line *line = (g_lines->head) ? g_lines->head->value : NULL;
+  if (!g_lines->head->previous)
+    return; 
 
-  switch (key) {
-    
-    case ARROW_RIGHT:
-      g_state.cursor_X++;
-      break;
+  t_line *line;
 
-    case ARROW_LEFT:
-      if (g_state.cursor_X > 0)
-        g_state.cursor_X--;
-      break;
-  }
+  head_to_previous(g_lines);  
+  line = g_lines->head->value;
+  g_state.cursor_Y--;
+  g_state.cursor_X = g_state.cursor_X > line->len
+                   ? line->len
+                   : g_state.cursor_X;
+}
+
+void cursor_to_down()
+{
+  if (!g_lines->head->next)
+    return;
+
+  t_line *line;
+
+  head_to_next(g_lines);
+  line = g_lines->head->value;
+  g_state.cursor_Y++;
+  g_state.cursor_X = g_state.cursor_X > line->len
+                   ? line->len
+                   : g_state.cursor_X;
+}
+
+
+void cursor_to_left()
+{
+  if (g_state.cursor_X > 0)
+    g_state.cursor_X--;
+}
+
+void cursor_to_right()
+{
+  t_line *line = g_lines->head->value;
+
+  if (g_state.cursor_X < line->len)
+    g_state.cursor_X++;
 }
 
 bool is_pair(int ch)
@@ -114,17 +143,14 @@ void process_keypress()
   switch (ch) {
 
     case '\r':                                    /* next line */
-
-      editor_insert_new_line();
+      insert_line();
+      cursor_to_down();
       break;
 
     case '\t':
-
-      insert_tab();
       break;
 
     case CTRL_KEY('q'):                           /* quit */
-
       if (g_state.dirty && quit_times > 0) {
         set_status_message("WARNING! File has unsaved changes!", quit_times);
           quit_times--;
@@ -137,7 +163,6 @@ void process_keypress()
       break;
 
     case CTRL_KEY('s'):
-
       editor_save();                              /* save */
       break;
 
@@ -148,16 +173,14 @@ void process_keypress()
       break;
 
     case CTRL_KEY('d'):
-      del_row(g_state.cursor_Y);
+      break;
 
     case BACKSPACE:                               /* del character */
-
-      move_cursor(ARROW_LEFT);
+      cursor_to_right();
       delete_char();
       break;
       
     case DEL_KEY:                                 /* del character */
-
       delete_char();
       break;
 
@@ -166,10 +189,19 @@ void process_keypress()
       break;
 
     case ARROW_UP:                                /* move cursor */
+      cursor_to_up();
+      break;
+
     case ARROW_DOWN:
+      cursor_to_down();
+      break;
+
     case ARROW_LEFT:
+      cursor_to_left();
+      break;
+
     case ARROW_RIGHT:
-      move_cursor(ch);
+      cursor_to_right();
       break;
 
     case '\x1b':
@@ -177,8 +209,7 @@ void process_keypress()
 
     default:                                     /* insert character */
       insert_char(ch); 
-      move_cursor(ARROW_RIGHT);
-
+      cursor_to_right();
       break;
   }
 

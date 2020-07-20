@@ -45,13 +45,12 @@ void print_lines(struct s_buffer *buffer)
   	buf_append(buffer, line->str, line->len);
 
     buf_append(buffer, "\x1b[K", 3);
-    buf_append(buffer, "\r\n\r\n", 4);
+    buf_append(buffer, "\r\n", 4);
   }
 
   /* fill empty space */
   for (int y = g_lines->size; y < g_state.screen_rows; y++) {
-
-  (y == 0) ? print_line_numbers(buffer, 1) : buf_append(buffer, "", 1);
+    buf_append(buffer, "", 1);
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
@@ -134,8 +133,8 @@ void refresh_screen()
   snprintf(buf,
            sizeof(buf),
            "\x1b[%d;%dH",
-           (g_state.cursor_Y) + 2,
-           (g_state.cursor_X) + (g_lines->size < 1000 ? 5 : 6));
+           g_state.cursor_Y + 2,
+           g_state.cursor_X + (g_lines->size < 1000 ? 5 : 6));
 
   buf_append(&buffer, buf, strlen(buf));
 

@@ -14,7 +14,10 @@ void refresh_screen(void);
 void process_keypress(void);
 /* lnklist.c */
 t_list* new_list(void);
+void insert_line(void);
+void init_head(t_list*);
 
+//void print_content(void);
 
 void init_editor()
 {
@@ -25,12 +28,14 @@ void init_editor()
 
   g_lines = new_list(); /* global variable for text */
 
+  insert_line();  /* insert first empty line */
+  init_head(g_lines);
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
-
-  enable_raw_mode();                        /* set terminal */
+  enable_raw_mode();      /* set terminal */
   atexit(disable_raw_mode);
-
   refresh_screen();
+
+//  atexit(print_content);
 }
 
 int main(int argc, char *argv[])
