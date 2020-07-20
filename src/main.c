@@ -13,27 +13,22 @@ void refresh_screen(void);
 /* input.c */
 void process_keypress(void);
 /* lnklist.c */
-List* new_list(void);
+t_list* new_list(void);
 
 
 void init_editor()
 {
-  E.cursor_X = 0; /* init state */
-  E.cursor_Y = 0;
-  E.row_offset = 0;
-  E.col_offset = 0;
-  E.num_rows = 0;
-  E.dirty = false;
-  E.file_name = NULL;
-  E.status_msg[0] = '\0';
-  E.syntax = NULL;
+  g_state.cursor_X = 0; /* init state */
+  g_state.cursor_Y = 0;
+  g_state.dirty = false;
+  g_state.status_msg[0] = '\0';
 
-  lines = new_list(); /* global variable for text */
+  g_lines = new_list(); /* global variable for text */
 
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
 
   enable_raw_mode();                        /* set terminal */
-  atexit(disable_raw_mode);    
+  atexit(disable_raw_mode);
 
   refresh_screen();
 }

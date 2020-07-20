@@ -62,17 +62,17 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
 
 void move_cursor(int key)
 {
-  Line *line = (lines->head) ? lines->head->value : NULL;
+  t_line *line = (g_lines->head) ? g_lines->head->value : NULL;
 
   switch (key) {
     
     case ARROW_RIGHT:
-      E.cursor_X++;
+      g_state.cursor_X++;
       break;
 
     case ARROW_LEFT:
-      if (E.cursor_X > 0)
-        E.cursor_X--;
+      if (g_state.cursor_X > 0)
+        g_state.cursor_X--;
       break;
   }
 }
@@ -99,8 +99,8 @@ int find_pair(int ch)
 
 void print_content()
 {
-  for (Node *current = lines->first; current; current = current->next) {
-    Line *line = current->value;
+  for (t_node *current = g_lines->first; current; current = current->next) {
+    t_line *line = current->value;
     printf("%s %lu\n", line->str, strlen(line->str));
   }
 }
@@ -125,7 +125,7 @@ void process_keypress()
 
     case CTRL_KEY('q'):                           /* quit */
 
-      if (E.dirty && quit_times > 0) {
+      if (g_state.dirty && quit_times > 0) {
         set_status_message("WARNING! File has unsaved changes!", quit_times);
           quit_times--;
           return;
@@ -142,48 +142,27 @@ void process_keypress()
       break;
 
     case HOME_KEY:                                /* to start line */
-
-      E.cursor_X = 0;
       break;
 
     case END_KEY:                                 /* to end line */
-
-      if (E.cursor_Y < E.num_rows)
-;//        E.cursor_X = row[E.cursor_Y].size;
       break;
 
     case CTRL_KEY('d'):
-      del_row(E.cursor_Y);
+      del_row(g_state.cursor_Y);
 
     case BACKSPACE:                               /* del character */
 
-      delete_char();
       move_cursor(ARROW_LEFT);
+      delete_char();
       break;
       
     case DEL_KEY:                                 /* del character */
 
-      move_cursor(ARROW_RIGHT);
       delete_char();
-      move_cursor(ARROW_LEFT);
       break;
 
     case PAGE_UP:                                 /* pageUp pageDown */
     case PAGE_DOWN:
-
-      {
-        if (ch == PAGE_UP) {
-          E.cursor_Y = E.row_offset;
-        } else if (ch == PAGE_DOWN) {
-          E.cursor_Y = E.row_offset + E.screen_rows - 1;
-            if (E.cursor_Y > E.num_rows)
-              E.cursor_Y   = E.num_rows;
-        }
-
-        int times = E.screen_rows;
-        while (times--)
-          move_cursor(ch == PAGE_UP ? ARROW_UP : ARROW_DOWN);
-      }
       break;
 
     case ARROW_UP:                                /* move cursor */

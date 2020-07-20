@@ -17,10 +17,6 @@ int is_separator(int ch)
   return isspace(ch) || ch == '\0' || strchr(",.()+-/*=~%<>[];", ch) != NULL;
 }
 
-void editor_update_syntax(Line *row)
-{
-}
-
 int editor_syntax_to_color(int hl)
 {
   switch (hl) {

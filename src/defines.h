@@ -48,7 +48,7 @@ enum editor_highlight {
 };
 
 
-struct char_buffer {
+struct s_buffer {
   char *str;
   int len;
 };
@@ -57,32 +57,31 @@ typedef struct {
   int capacity;
   int len;
   char *str;
-} Line;
+} t_line;
 
 typedef struct {
 	void *value;
 	void *next;
 	void *previous;
-} Node;
+} t_node;
 
 typedef struct  {
-	Node *head;
-	Node *first;
-	Node *last;
+	t_node *head;
+	t_node *first;
+	t_node *last;
 	int size;
-} List;
+} t_list;
 
-struct Editor_config {
+struct s_state {
   int cursor_X;
   int cursor_Y;
-  int row_offset;
-  int col_offset;
   int screen_rows;
   int screen_cols;
-  int num_rows;
   char *file_name;
   char status_msg[80];
   bool dirty;
-  bool is_new_file;
-  struct editor_syntax *syntax;
 };
+
+struct s_state g_state;
+
+t_list *g_lines;
