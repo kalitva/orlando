@@ -2,12 +2,11 @@
 #include "data.h"
 
 
-int editor_row_cx_to_rx(erow*, int);
-int editor_syntax_to_color(int);
+/* terminal.c */
 void get_window_size(int*, int*);
 
 
-void buf_append(struct char_buffer *buffer, const char *str, int len)
+void buf_append(struct s_buffer *buffer, const char *str, int len)
 {
   char *new = realloc(buffer->str, buffer->len + len);
 
@@ -19,34 +18,15 @@ void buf_append(struct char_buffer *buffer, const char *str, int len)
   buffer->len += len;
 }
 
-void buf_free(struct char_buffer *buffer) 
+void buf_free(struct s_buffer *buffer) 
 {
   free(buffer->str);
 }
 
-void scroll()
-{
-    E.rx = 0;
-    if (E.cy < E.num_rows)
-        E.rx = editor_row_cx_to_rx(&E.row[E.cy], E.cx);
-
-    if (E.cy < E.row_offset)
-        E.row_offset = E.cy;
-
-    if (E.cy >= E.row_offset + E.screen_rows)
-        E.row_offset = E.cy - E.screen_rows + 1;
-
-    if (E.rx < E.col_offset)
-        E.col_offset = E.rx;
-
-    if (E.rx >= E.col_offset + E.screen_cols)
-        E.col_offset = E.rx - E.screen_cols + 1;
-}
-
-void draw_line_numbers(struct char_buffer *buffer, int line)
+void print_line_numbers(struct s_buffer *buffer, int line)
 {
   char line_number[6]; /* make number */
-  sprintf(line_number, E.num_rows < 1000 ? "%3d " : "%4d ", line + 1);
+  sprintf(line_number, g_lines->size < 1000 ? "%3d " : "%4d ", line);
 
   buf_append(buffer, "\x1b[m", 3);
   buf_append(buffer, "\x1b[30m", 5); /* color gray */
@@ -54,81 +34,31 @@ void draw_line_numbers(struct char_buffer *buffer, int line)
   buf_append(buffer, "\x1b[m", 3);
 }
 
-void draw_rows(struct char_buffer *buffer)
+void print_lines(struct s_buffer *buffer)
 {
-  int file_row;
+  int line_number = 1;
 
-  for (int y = 0; y < E.screen_rows; y++) {
-    file_row = y + E.row_offset;
+  for (t_node *current = g_lines->first; current; current = current->next) {
+  	print_line_numbers(buffer, line_number++);	
 
-    if (file_row >= E.num_rows) { /* if rows don't fill screen, insert space */
+  	t_line *line = current->value;
+  	buf_append(buffer, line->str, line->len);
 
-      if (y == 0) 
-        draw_line_numbers(buffer, 0); /* number of line for first row */
+    buf_append(buffer, "\x1b[K", 3);
+    buf_append(buffer, "\r\n\r\n", 4);
+  }
 
-      buf_append(buffer, " ", 1);
+  /* fill empty space */
+  for (int y = g_lines->size; y < g_state.screen_rows; y++) {
 
-    } else { 
-
-      draw_line_numbers(buffer, file_row); /* insert number of line */
-
-      int len = E.row[file_row].rsize - E.col_offset;
-                                                      /* find row length */
-      if (len < 0)
-        len = 0;
-      if (len > E.screen_cols)
-        len = E.screen_cols;
-          
-          char *ch = &E.row[file_row].render[E.col_offset];
-          unsigned char *hl = &E.row[file_row].hl[E.col_offset];
-          int current_color = -1;
-
-      for (int j = 0; j < len; j++) { /* draw line */
-
-        if (iscntrl(ch[j])) {
-          char sym = (ch[j] <= 26) ? '@' + ch[j] : '?';
-          buf_append(buffer, &sym, 1);
-
-          if (current_color != -1) {
-            char buf[16];
-            int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", current_color);
-            buf_append(buffer, buf, clen);
-          }
-
-        } else if (hl[j] == HL_NORMAL) {
-
-          if (current_color != -1) {
-            buf_append(buffer, "\x1b[m", 3);
-            current_color = -1;
-          }
-
-          buf_append(buffer, &ch[j], 1);
-
-        } else { /* highilght syntax */
-                                            /* bold font for keywords */
-          if (hl[j] == HL_KEYWORD1 || hl[j] == HL_KEYWORD2)
-            buf_append(buffer, "\x1b[1m", 4);
-
-          int color = editor_syntax_to_color(hl[j]);
-
-          if (color != current_color) {
-            current_color = color;
-            char buf[16];
-            int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", color);
-            buf_append(buffer, buf, clen);
-          }
-
-          buf_append(buffer, &ch[j], 1);
-        }
-      }
-    }
+  (y == 0) ? print_line_numbers(buffer, 1) : buf_append(buffer, "", 1);
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
   }
 }
 
-void draw_topbar(struct char_buffer *buffer)
+void draw_topbar(struct s_buffer *buffer)
 {
   buf_append(buffer, "\x1b[7m", 4); /* invent colors */
 
@@ -138,13 +68,13 @@ void draw_topbar(struct char_buffer *buffer)
 
   int header_length = snprintf(header, /* make header */
                                sizeof(header),
-                              "%.20s%c",
-                              E.file_name ? E.file_name : "[Untitled]",
-                              E.dirty ? '*' : ' ');
+                               "%.20s%c",
+                               g_state.file_name ? g_state.file_name : "[No Name]",
+                               g_state.dirty ? '*' : ' ');
 
   /* make white spaces around header */
-  space_left_length = (E.screen_cols - header_length) / 2;
-  space_right_length = (E.screen_cols - space_left_length - header_length);
+  space_left_length = (g_state.screen_cols - header_length) / 2;
+  space_right_length = (g_state.screen_cols - space_left_length - header_length);
 
   char space_left[space_left_length];
   char space_right[space_right_length];
@@ -162,24 +92,24 @@ void draw_topbar(struct char_buffer *buffer)
   buf_append(buffer, "\r\n", 2);
 }
 
-void draw_footer(struct char_buffer *buffer)
+void draw_footer(struct s_buffer *buffer)
 {
   char cursor[23]; /* make string, that contents line and column nimbers */
   int cursor_len = snprintf(cursor, 
               sizeof cursor, 
               "line: %d column: %d", 
-              E.cy + 1,
-              E.rx + 1);
+              g_state.cursor_Y + 1,
+              g_state.cursor_X + 1);
   
-  int msg_len = strlen(E.status_msg);
+  int msg_len = strlen(g_state.status_msg);
   
-  int space_len = (E.screen_cols - msg_len - cursor_len); /* empty space */
+  int space_len = (g_state.screen_cols - msg_len - cursor_len); /* empty space */
   char space[space_len];
   for (int i = 0; i < space_len; i++)
     space[i] = ' ';
 
   buf_append(buffer, "\x1b[7m", 4); /* put footer in buffer */
-  buf_append(buffer, E.status_msg, msg_len);
+  buf_append(buffer, g_state.status_msg, msg_len);
   buf_append(buffer, space, space_len - 1);
   buf_append(buffer, cursor, cursor_len);
   buf_append(buffer, " ", 1);
@@ -188,36 +118,35 @@ void draw_footer(struct char_buffer *buffer)
 
 void refresh_screen()
 {
-  struct char_buffer buffer = BUF_INIT; /* create buffer */
+  struct s_buffer buffer = BUF_INIT; /* create buffer */
 
-  get_window_size(&E.screen_rows, &E.screen_cols); /* get screen params */
+  get_window_size(&g_state.screen_rows, &g_state.screen_cols); /* get screen params */
 
-  scroll(); /* move cursor */
+//  scroll(); /* move cursor */
 
-    buf_append(&buffer, "\x1b[?25l", 6);  
-    buf_append(&buffer, "\x1b[H", 3);
+  buf_append(&buffer, "\x1b[H", 3);
 
   draw_topbar(&buffer); /* put all in buffer */
-  draw_rows(&buffer);
+  print_lines(&buffer);
   draw_footer(&buffer);
 
   char buf[16];   /* find cursor position */
   snprintf(buf,
            sizeof(buf),
            "\x1b[%d;%dH",
-           (E.cy - E.row_offset) + 2,
-           (E.rx - E.col_offset) + (E.num_rows < 1000 ? 5 : 6));
+           (g_state.cursor_Y) + 2,
+           (g_state.cursor_X) + (g_lines->size < 1000 ? 5 : 6));
+
   buf_append(&buffer, buf, strlen(buf));
-  buf_append(&buffer, "\x1b[?25h", 6);
 
   write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
-  buf_free(&buffer); /* free memory */
+  buf_free(&buffer); /* free buffer */
 }
 
 void set_status_message(const char *ftime, ...)
 {
     va_list ap;
     va_start(ap, ftime);
-    vsnprintf(E.status_msg, sizeof(E.status_msg), ftime, ap);
+    vsnprintf(g_state.status_msg, sizeof(g_state.status_msg), ftime, ap);
     va_end(ap);
 }

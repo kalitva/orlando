@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-
 #define TAB 2
 #define KILO_QUIT_TIMES 1
 
@@ -49,44 +48,40 @@ enum editor_highlight {
 };
 
 
-struct char_buffer {
+struct s_buffer {
   char *str;
   int len;
 };
 
-struct editor_syntax {
-  char *file_type;
-  char **file_match;
-  char **keywords;
-  char *single_line_comment_start;
-  char *multiline_comment_start;
-  char *multiline_comment_end;
-  int flags;
-};
+typedef struct {
+  int capacity;
+  int len;
+  char *str;
+} t_line;
 
-typedef struct erow {
-  int idx;
-  int size;
-  int rsize;
-  char *chars;
-  char *render;
-  unsigned char *hl;
-  int hl_open_comment;
-} erow;
+typedef struct {
+	void *value;
+	void *next;
+	void *previous;
+} t_node;
 
-struct editor_config {
-  int cx;
-  int cy;
-  int rx;
-  int row_offset;
-  int col_offset;
+typedef struct  {
+	t_node *head;
+	t_node *first;
+	t_node *last;
+	int size;
+} t_list;
+
+struct s_state {
+  int cursor_X;
+  int cursor_Y;
   int screen_rows;
   int screen_cols;
-  int num_rows;
-  erow *row;
   char *file_name;
   char status_msg[80];
   bool dirty;
-  bool is_new_file;
-  struct editor_syntax *syntax;
 };
+
+struct s_state g_state;
+
+t_list *g_lines;
