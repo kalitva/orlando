@@ -186,10 +186,10 @@ void process_keypress()
       break;
 
     case BACKSPACE:                               /* del character */
-      cursor_to_right();
+      cursor_to_left();
       delete_char();
       break;
-      
+
     case DEL_KEY:                                 /* del character */
       delete_char();
       break;

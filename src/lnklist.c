@@ -69,7 +69,7 @@ void prepend_node(t_list *list, void *value)
 
 void insert_node(t_list *list, void *value)
 {
-	if (is_empty(list))
+	if (!list->head)
 		return;
 
 	if (list->head == list->last) {

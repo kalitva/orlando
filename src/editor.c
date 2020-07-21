@@ -21,14 +21,25 @@ t_line* new_line()
 
 void insert_line()
 {
-  t_line *line = new_line();
+  t_line *line;
+  t_line *new = new_line();
 
-  if (is_empty(g_lines)) {
-    append_node(g_lines, line);
+  if (is_empty(g_lines)) {  /* first insertion */
+    append_node(g_lines, new);
     return;
   }
 
-  append_node(g_lines, line);
+  line = g_lines->head->value;
+
+  new->len = line->len - g_state.cursor_X;
+
+  for (int i = 0; i < new->len; i++) {
+    new->str[i] = line->str[g_state.cursor_X + i];
+    line->str[g_state.cursor_X + i] = 0;
+    line->len--;
+  }
+
+  insert_node(g_lines, new);
 }
 
 void insert_char(int ch)
