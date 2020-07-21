@@ -21,7 +21,7 @@
 #define HL_HIGHLLIGHT_STRINGS (1<<1)
 #define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
 
-#define BUF_INIT { NULL, 0, 80 }
+#define BUF_INIT { NULL, 0 }
 
 enum editor_key {
   BACKSPACE = 127,
@@ -51,7 +51,6 @@ enum editor_highlight {
 struct s_buffer {
   char *str;
   int len;
-  int capacity;
 };
 
 typedef struct {

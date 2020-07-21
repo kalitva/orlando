@@ -64,7 +64,7 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
 void cursor_to_up()
 {
   if (!g_lines->head->previous)
-    return; 
+    return;
 
   t_line *line;
 
@@ -91,19 +91,29 @@ void cursor_to_down()
                    : g_state.cursor_X;
 }
 
-
 void cursor_to_left()
 {
-  if (g_state.cursor_X > 0)
+  t_line *line;
+
+  if (g_state.cursor_X > 0) {
     g_state.cursor_X--;
+  } else {
+    cursor_to_up();
+    line = g_lines->head->value;
+    g_state.cursor_X = line->len;
+  }
 }
 
 void cursor_to_right()
 {
   t_line *line = g_lines->head->value;
 
-  if (g_state.cursor_X < line->len)
+  if (g_state.cursor_X < line->len) {
     g_state.cursor_X++;
+  } else {
+    cursor_to_down();
+    g_state.cursor_X = (g_state.cursor_Y != 0) ? 0 : g_state.cursor_X;
+  }
 }
 
 bool is_pair(int ch)

@@ -1,18 +1,17 @@
 #include "defines.h"
 #include "data.h"
 
+
 /* lnklist.c */
 void append_node(t_list*, void*);
 void insert_node(t_list*, void*);
 bool is_empty(t_list*);
 
-void update_row(t_line *row)
-{
-}
 
 t_line* new_line()
 {
   t_line *line = malloc(sizeof(t_line));
+
   line->capacity = 80;
   line->len = 0;
   line->str = malloc(sizeof(int) * line->capacity);
@@ -45,8 +44,8 @@ void insert_char(int ch)
 		line->str[line->len++] = ch;
 		return;
 	}
-
-	for (int i = line->len - 1; i >= g_state.cursor_X; i--) /* or move chars to right */
+                                                /* or move chars to right */
+	for (int i = line->len - 1; i >= g_state.cursor_X; i--) 
 		line->str[i + 1] = line->str[i];
 
 	line->str[g_state.cursor_X] = ch;							/* and insert char */

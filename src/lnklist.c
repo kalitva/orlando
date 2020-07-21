@@ -9,9 +9,11 @@ bool is_empty(t_list *list)
 t_list* new_list()
 {
 	t_list *list = malloc(sizeof(t_list));
+
 	list->first = NULL;
 	list->last = NULL;
 	list->head = NULL;
+	list->size = 0;
 
 	return list;
 }
@@ -19,11 +21,18 @@ t_list* new_list()
 t_node* new_node(void *value)
 {
 	t_node *node = malloc(sizeof(t_node));
+	
 	node->value = value;
 	node->next = NULL;
 	node->previous = NULL;
 
 	return node;
+}
+
+void free_node(t_node *node)
+{
+	free(node);
+	node = NULL;
 }
 
 void append_node(t_list *list, void *value)
@@ -42,18 +51,9 @@ void append_node(t_list *list, void *value)
 	list->size++;
 }
 
-void free_node(t_node *node)
-{
-	free(node->value);
-	node->next = NULL;
-	node->previous = NULL;
-	node = NULL;
-}
-
 void prepend_node(t_list *list, void *value)
 {
-	t_node *node = malloc(sizeof(t_node));
-	node->value = value;
+	t_node *node = new_node(value);
 
 	if (is_empty(list)) {
 		list->first = node;
