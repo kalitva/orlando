@@ -11,6 +11,7 @@ int read_key();
 void insert_char(int);
 void delete_char(void);
 void insert_line(void);
+void delete_line(void);
 /* editor file_io.c */
 void editor_save();
 /* lnklist.c */
@@ -146,8 +147,7 @@ void print_content()
 
 void process_keypress()
 {
-  static int quit_times = KILO_QUIT_TIMES;
-
+  static int quit_times = 2;
   int ch = read_key();
 
   switch (ch) {
@@ -173,32 +173,33 @@ void process_keypress()
       break;
 
     case CTRL_KEY('s'):
-      editor_save();                              /* save */
+      editor_save();
       break;
 
-    case HOME_KEY:                                /* to start line */
+    case HOME_KEY:
       break;
 
-    case END_KEY:                                 /* to end line */
+    case END_KEY:
       break;
 
     case CTRL_KEY('d'):
+      delete_line();
       break;
 
-    case BACKSPACE:                               /* del character */
+    case BACKSPACE:
       cursor_to_left();
       delete_char();
       break;
 
-    case DEL_KEY:                                 /* del character */
+    case DEL_KEY:
       delete_char();
       break;
 
-    case PAGE_UP:                                 /* pageUp pageDown */
+    case PAGE_UP:
     case PAGE_DOWN:
       break;
 
-    case ARROW_UP:                                /* move cursor */
+    case ARROW_UP:
       cursor_to_up();
       break;
 
@@ -217,7 +218,7 @@ void process_keypress()
     case '\x1b':
       break;
 
-    default:                                     /* insert character */
+    default: 
       insert_char(ch); 
       cursor_to_right();
       break;

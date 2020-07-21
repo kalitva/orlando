@@ -5,6 +5,9 @@
 /* lnklist.c */
 void append_node(t_list*, void*);
 void insert_node(t_list*, void*);
+void remove_first(t_list*);
+void remove_last(t_list*);
+void remove_head(t_list*);
 bool is_empty(t_list*);
 
 
@@ -12,11 +15,18 @@ t_line* new_line()
 {
   t_line *line = malloc(sizeof(t_line));
 
+  line->str = malloc(sizeof(int) * 80);
   line->capacity = 80;
   line->len = 0;
-  line->str = malloc(sizeof(int) * line->capacity);
 
   return line;
+}
+
+void free_line(t_line *line)
+{
+  free(line->str);
+  line->str = NULL;
+  line->len = 0;
 }
 
 void insert_line()
@@ -42,9 +52,43 @@ void insert_line()
   insert_node(g_lines, new);
 }
 
+void delete_line()
+{
+  t_line *line = g_lines->head->value;
+
+  free_line(line);
+  g_state.cursor_X = 0;
+
+  if (g_lines->size == 1)
+    return;
+
+  if (g_lines->head == g_lines->first) {
+
+    remove_first(g_lines);
+    g_lines->head = g_lines->first;
+
+  } else if (g_lines->head == g_lines->last) {
+
+    remove_last(g_lines);
+    g_lines->head = g_lines->last;
+    g_state.cursor_Y--;
+
+  } else {
+
+    remove_head(g_lines);
+    g_lines->head = g_lines->first;
+
+    for (int i = 0; i < g_state.cursor_Y; i++)
+      g_lines->head = g_lines->head->next;
+  }
+}
+
 void insert_char(int ch)
 {
 	t_line *line = g_lines->head->value;
+
+  if (!line->str)
+    line->str = malloc(sizeof(int) * line->capacity);
 
 	if (line->len > line->capacity - 1) { /* increase memory */
 		line->capacity *= 1.5;

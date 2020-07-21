@@ -31,8 +31,8 @@ t_node* new_node(void *value)
 
 void free_node(t_node *node)
 {
-	free(node);
-	node = NULL;
+	free(node->value);
+	node->value = NULL;
 }
 
 void append_node(t_list *list, void *value)
@@ -97,7 +97,9 @@ void remove_last(t_list *list)
 	t_node *tmp = list->last;
 
 	list->last = list->last->previous;
-	list->last->next = NULL;
+
+	if (list->last)
+		list->last->next = NULL;
 
 	list->size--;
 	free_node(tmp);
@@ -111,7 +113,9 @@ void remove_first(t_list *list)
 	t_node *tmp = list->first;
 
 	list->first = list->first->next;
-	list->first->previous = NULL;
+
+	if (list->first)
+		list->first->previous = NULL;
 
 	list->size--;
 	free_node(tmp);
@@ -119,7 +123,7 @@ void remove_first(t_list *list)
 
 void remove_head(t_list *list)
 {
-	if (is_empty(list))
+	if (is_empty(list) || !list->head)
 		return;
 
 	if (list->head == list->first) {

@@ -34,8 +34,6 @@ void init_editor()
   enable_raw_mode();      /* set terminal */
   atexit(disable_raw_mode);
   refresh_screen();
-
-//  atexit(print_content);
 }
 
 int main(int argc, char *argv[])
