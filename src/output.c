@@ -1,5 +1,4 @@
 #include "defines.h"
-#include "data.h"
 
 
 /* terminal.c */
@@ -50,8 +49,6 @@ void print_lines(struct s_buffer *buffer)
 
   /* fill empty space */
   for (int y = g_lines->size; y < g_state.screen_rows; y++) {
-    buf_append(buffer, "", 1);
-
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
   }

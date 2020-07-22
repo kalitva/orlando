@@ -1,13 +1,12 @@
 #include "defines.h"
-#include "data.h"
 
 
 /* input.c */
 char *editor_prompt(char *prompt, void (*callback)(char *, int));
-/* highlighting.c */
-void editor_select_syntax_highlight();
+void cursor_to_down();
 /* editor.c */
-void insert_line(t_node *node);
+void insert_line();
+void delete_line();
 /* output.c */
 void set_status_message(const char*, ...);
 
@@ -18,31 +17,37 @@ char *editor_rows_to_string(int *buf_len)
 
 void open_file(char *file_name)
 {
-  g_state.file_name = strdup(file_name); /* write file-name to global state */
+	char ch;
+	FILE *fp;
+	t_line *line;
 
-  editor_select_syntax_highlight();
+  g_state.file_name = file_name;
+  fp = fopen(file_name, "r");
+	line = g_lines->head->value;
 
-  FILE *fp = fopen(file_name, "r"); /* open file */
-
-  if (!fp)
-    fp = fopen(file_name, "w"); /* create file, if don't exit */
+  if (!fp) {
+    fp = fopen(file_name, "w"); /* create file */
+  	return;
+  }
   
-  /* print content */
-  char* line = NULL;
-  size_t line_cap;
-  ssize_t line_len;
+  while ((ch = getc(fp)) != EOF) {
 
-  while ((line_len = getline(&line, &line_cap, fp)) != -1) {
-
-    while ((line_len--) > 0
-        && (line[line_len - 1] == '\n' || line[line_len - 1] == '\r'));
-
-//    insert_row(g_state.num_rows, line, line_len);
+  	if (ch != '\n') {
+  		line->str[line->len++] = ch;
+  	} else {
+  		g_state.cursor_X = line->len;
+  		insert_line();
+  		head_to_next();
+	  	line = g_lines->head->value;
+  	}
   }
 
-  free(line); /* close stream */
-  fclose(fp);
+  delete_line();
+  g_state.cursor_X = g_state.cursor_Y = 0;	/* !!!replace with function home */
+  g_lines->head = g_lines->first;
   g_state.dirty = false;
+
+  fclose(fp);
 }
 
 void editor_save()

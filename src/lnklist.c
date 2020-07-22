@@ -33,6 +33,8 @@ void free_node(t_node *node)
 {
 	free(node->value);
 	node->value = NULL;
+	free(node);
+	node = NULL;
 }
 
 void append_node(t_list *list, void *value)
@@ -156,10 +158,12 @@ void init_head(t_list *list)
 
 void head_to_next(t_list *list)
 {
-	list->head = list->head->next ? list->head->next : list->head;
+	if (list->head)
+		list->head = list->head->next ? list->head->next : list->head;
 }
 
 void head_to_previous(t_list *list)
 {
-	list->head = list->head->previous ? list->head->previous : list->head;
+	if (list->head)
+		list->head = list->head->previous ? list->head->previous : list->head;
 }

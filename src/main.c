@@ -1,5 +1,4 @@
 #include "defines.h"
-#include "data.h"
 
 
 /* terminal.c */
@@ -17,11 +16,10 @@ t_list* new_list(void);
 void insert_line(void);
 void init_head(t_list*);
 
-//void print_content(void);
 
-void init_editor()
+void init()
 {
-  g_state.cursor_X = 0; /* init state */
+  g_state.cursor_X = 0;
   g_state.cursor_Y = 0;
   g_state.dirty = false;
   g_state.status_msg[0] = '\0';
@@ -33,15 +31,16 @@ void init_editor()
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
   enable_raw_mode();      /* set terminal */
   atexit(disable_raw_mode);
-  refresh_screen();
 }
 
 int main(int argc, char *argv[])
 {
-  init_editor(); 
+  init(); 
     
   if (argc >= 2)        /* open file */
     open_file(argv[1]);
+
+  refresh_screen();
 
   while (true)          /* listen input */
     process_keypress();

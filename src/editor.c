@@ -1,5 +1,4 @@
 #include "defines.h"
-#include "data.h"
 
 
 /* lnklist.c */

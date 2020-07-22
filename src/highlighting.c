@@ -1,5 +1,4 @@
 #include "defines.h"
-#include "data.h"
 
 char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
 char *C_HL_keywords[] = {
