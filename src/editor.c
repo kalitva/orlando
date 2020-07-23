@@ -8,6 +8,7 @@ void remove_first(t_list*);
 void remove_last(t_list*);
 void remove_head(t_list*);
 bool is_empty(t_list*);
+void head_to_next(t_list*);
 
 
 t_line* new_line()
@@ -84,26 +85,26 @@ void delete_line()
 
 void insert_char(int ch)
 {
-	t_line *line = g_lines->head->value;
+  t_line *line = g_lines->head->value;
 
   if (!line->str)
     line->str = malloc(sizeof(int) * line->capacity);
 
-	if (line->len > line->capacity - 1) { /* increase memory */
-		line->capacity *= 1.5;
-		line->str = realloc(line->str, line->capacity * sizeof(int));
-	}
+  if (line->len > line->capacity - 1) { /* increase memory */
+    line->capacity *= 1.5;
+    line->str = realloc(line->str, line->capacity * sizeof(int));
+  }
 
-	if (g_state.cursor_X == line->len) {	/* append char and return */
-		line->str[line->len++] = ch;
-		return;
-	}
+  if (g_state.cursor_X == line->len) {  /* append char and return */
+    line->str[line->len++] = ch;
+    return;
+  }
                                                 /* or move chars to right */
-	for (int i = line->len - 1; i >= g_state.cursor_X; i--) 
-		line->str[i + 1] = line->str[i];
+  for (int i = line->len - 1; i >= g_state.cursor_X; i--) 
+    line->str[i + 1] = line->str[i];
 
-	line->str[g_state.cursor_X] = ch;							/* and insert char */
-  line->len++;								/*increase sring length */
+  line->str[g_state.cursor_X] = ch;             /* and insert char */
+  line->len++;                /*increase sring length */
 }
 
 void insert_tab()
@@ -113,14 +114,40 @@ void insert_tab()
 
 void delete_char()
 {
-	t_line *line = g_lines->head->value;
+  t_line *line;
+  t_line *next_line;
 
-  if (g_state.cursor_Y == 0 && line->len == 0 || line->len <= g_state.cursor_X)
+  line = g_lines->head->value;
+
+  if (line->len == g_state.cursor_X && g_lines->head == g_lines->last)
     return;
 
-	for (int i = g_state.cursor_X; i < line->len; i++) /* move chars to left */
-		line->str[i] = line->str[i + 1];
+  if (line->len == 0) {
+    delete_line();
+    return;
+  }
 
-	line->str[line->len - 1] = 0; /* delete char */
-	line->len--;									/* decrease line length */
+  if (line->len == g_state.cursor_X) {
+
+    head_to_next(g_lines);
+    next_line = g_lines->head->value;
+
+    strcat(line->str, next_line->str);
+    line->len += next_line->len;
+
+    remove_head(g_lines);
+
+    g_lines->head = g_lines->first;
+
+    for (int i = 0; i < g_state.cursor_Y; i++)
+      g_lines->head = g_lines->head->next;
+
+    return;
+  }
+
+  for (int i = g_state.cursor_X; i < line->len; i++) /* move chars to left */
+    line->str[i] = line->str[i + 1];
+
+  line->str[line->len - 1] = 0; /* delete char */
+  line->len--;
 }

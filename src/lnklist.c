@@ -144,6 +144,7 @@ void remove_head(t_list *list)
 	head_previous->next = list->head->next;
 	head_next->previous = list->head->previous;
 
+//	list->head = list->head->next;
 	list->size--;
 	free_node(tmp);
 }

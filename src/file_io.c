@@ -43,8 +43,7 @@ void open_file(char *file_name)
   }
 
   delete_line();
-  g_state.cursor_X = g_state.cursor_Y = 0;	/* !!!replace with function home */
-  g_lines->head = g_lines->first;
+  cursor_to_start();
   g_state.dirty = false;
 
   fclose(fp);

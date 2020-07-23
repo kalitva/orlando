@@ -2,8 +2,8 @@
 
 
 /* terminal.c */
-void disable_raw_mode(void);
 void enable_raw_mode(void);
+void disable_raw_mode(void);
 /* file_io.c */
 void open_file(char*);
 /* output.c */
