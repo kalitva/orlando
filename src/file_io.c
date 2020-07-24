@@ -2,13 +2,17 @@
 
 
 /* input.c */
-char *editor_prompt(char *prompt, void (*callback)(char *, int));
-void cursor_to_down();
+char *editor_prompt(char *, void (*callback)(char *, int));
+void cursor_to_down(void);
+void cursor_to_end_line(void);
+void cursor_to_start(void);
 /* editor.c */
-void insert_line();
-void delete_line();
+void insert_line(void);
+void delete_line(void);
 /* output.c */
-void set_status_message(const char*, ...);
+void set_status_message(const char *, ...);
+/* lnklist.c */
+void head_to_next(void);
 
 
 char *editor_rows_to_string(int *buf_len)
@@ -35,14 +39,14 @@ void open_file(char *file_name)
   	if (ch != '\n') {
   		line->str[line->len++] = ch;
   	} else {
-  		g_state.cursor_X = line->len;
+  		cursor_to_end_line();
   		insert_line();
-  		head_to_next();
+  		cursor_to_down();
 	  	line = g_lines->head->value;
   	}
   }
 
-  delete_line();
+//  delete_line();
   cursor_to_start();
   g_state.dirty = false;
 
@@ -57,7 +61,6 @@ void editor_save()
             set_status_message("Save aborted");
             return;
         }
-        editor_select_syntax_highlight();
     }
 
     int len;

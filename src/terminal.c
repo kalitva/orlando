@@ -1,10 +1,6 @@
 #include "defines.h"
 
 
-/* output.c */
-void refresh_screen();
-
-
 struct termios orig_termios;
 struct termios raw_mode;
 
@@ -18,7 +14,7 @@ void die(const char *s)
     exit(1);
 }
 
-void enable_raw_mode()
+void enable_screen()
 {
   tcgetattr(STDIN_FILENO, &orig_termios); /* get old terminal settings and */
                                           /* save them in <orig_termios> */
@@ -35,7 +31,7 @@ void enable_raw_mode()
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw_mode);
 }
 
-void disable_raw_mode()
+void disable_screen()
 {
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
@@ -106,31 +102,6 @@ int read_key()
       
         return ch;
     }
-}
-
-int get_cursor_position(int *rows, int *cols)
-{
-    char buf[32];
-    unsigned int i = 0;
-
-    if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4)
-        return -1;
-
-    while (i < sizeof(buf) - 1) {
-        if (read(STDIN_FILENO, &buf[i], 1) != 1)
-            break;
-        if (buf[i] == 'R')
-            break;
-        i++;
-    }
-    buf[i] = '\0';
-
-    if (buf[0] != '\x1b' || buf[1] != '[')
-        return -1;
-    if (sscanf(&buf[2], "%d;%d", rows, cols) != 2)
-        return -1;
-
-    return 0;
 }
 
 void get_window_size(int *rows, int *cols)

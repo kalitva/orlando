@@ -2,13 +2,13 @@
 
 
 /* lnklist.c */
-void append_node(t_list*, void*);
-void insert_node(t_list*, void*);
-void remove_first(t_list*);
-void remove_last(t_list*);
-void remove_head(t_list*);
-bool is_empty(t_list*);
-void head_to_next(t_list*);
+void append_node(t_list *, void *);
+void insert_node(t_list *, void *);
+void remove_first(t_list *);
+void remove_last(t_list *);
+void remove_head(t_list *);
+bool is_empty(t_list *);
+void head_to_next(t_list *);
 
 
 t_line* new_line()
@@ -66,6 +66,7 @@ void delete_line()
 
     remove_first(g_lines);
     g_lines->head = g_lines->first;
+    g_state.top_line = g_lines->first;
 
   } else if (g_lines->head == g_lines->last) {
 
@@ -105,11 +106,6 @@ void insert_char(int ch)
 
   line->str[g_state.cursor_X] = ch;             /* and insert char */
   line->len++;                /*increase sring length */
-}
-
-void insert_tab()
-{
-
 }
 
 void delete_char()

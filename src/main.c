@@ -2,35 +2,40 @@
 
 
 /* terminal.c */
-void enable_raw_mode(void);
-void disable_raw_mode(void);
+void enable_screen(void);
+void disable_screen(void);
 /* file_io.c */
-void open_file(char*);
+void open_file(char *);
 /* output.c */
-void set_status_message(const char*, ...);
+void set_status_message(const char *, ...);
 void refresh_screen(void);
 /* input.c */
 void process_keypress(void);
 /* lnklist.c */
 t_list* new_list(void);
+void init_head(t_list *);
+/* editor.c */
 void insert_line(void);
-void init_head(t_list*);
-
+void init_top_line(void);
 
 void init()
 {
+  g_lines = new_list(); /* global variable for text */
+
   g_state.cursor_X = 0;
   g_state.cursor_Y = 0;
   g_state.dirty = false;
   g_state.status_msg[0] = '\0';
 
-  g_lines = new_list(); /* global variable for text */
-
   insert_line();  /* insert first empty line */
   init_head(g_lines);
+
+  g_state.top_line = g_lines->first;
+  g_state.top_line_number = 1;
+
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
-  enable_raw_mode();      /* set terminal */
-  atexit(disable_raw_mode);
+  enable_screen();      /* set terminal */
+  atexit(disable_screen);
 }
 
 int main(int argc, char *argv[])

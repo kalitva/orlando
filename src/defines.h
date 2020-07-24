@@ -76,11 +76,13 @@ struct s_state {
   int cursor_Y;
   int screen_rows;
   int screen_cols;
+  t_node *top_line;
+  int top_line_number;
   char *file_name;
   char status_msg[80];
   bool dirty;
 };
 
-struct s_state g_state;
 
+struct s_state g_state;
 t_list *g_lines;

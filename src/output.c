@@ -2,7 +2,7 @@
 
 
 /* terminal.c */
-void get_window_size(int*, int*);
+void get_window_size(int *, int *);
 
 
 void buf_append(struct s_buffer *buffer, const char *str, int len)
@@ -17,7 +17,7 @@ void buf_append(struct s_buffer *buffer, const char *str, int len)
   buffer->len += len;
 }
 
-void buf_free(struct s_buffer *buffer) 
+void buf_free(struct s_buffer *buffer)
 {
   free(buffer->str);
 }
@@ -36,15 +36,20 @@ void print_line_numbers(struct s_buffer *buffer, int line)
 void print_lines(struct s_buffer *buffer)
 {
   int line_number = 1;
+  t_node *current;
 
-  for (t_node *current = g_lines->first; current; current = current->next) {
-  	print_line_numbers(buffer, line_number++);	
+  current = g_state.top_line;
+
+  for (int y = 0; y < g_state.screen_rows && current; y++) {
+  	print_line_numbers(buffer, g_state.top_line_number + y);	
 
   	t_line *line = current->value;
   	buf_append(buffer, line->str, line->len);
 
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 4);
+
+    current = current->next;
   }
 
   /* fill empty space */
@@ -94,7 +99,7 @@ void draw_footer(struct s_buffer *buffer)
   int cursor_len = snprintf(cursor, 
               sizeof cursor, 
               "line: %d column: %d", 
-              g_state.cursor_Y + 1,
+              g_state.cursor_Y + g_state.top_line_number,
               g_state.cursor_X + 1);
   
   int msg_len = strlen(g_state.status_msg);
@@ -114,15 +119,13 @@ void draw_footer(struct s_buffer *buffer)
 
 void refresh_screen()
 {
-  struct s_buffer buffer = BUF_INIT; /* create buffer */
+  struct s_buffer buffer = BUF_INIT;
 
-  get_window_size(&g_state.screen_rows, &g_state.screen_cols); /* get screen params */
-
-//  scroll(); /* move cursor */
+  get_window_size(&g_state.screen_rows, &g_state.screen_cols);
 
   buf_append(&buffer, "\x1b[H", 3);
 
-  draw_topbar(&buffer); /* put all in buffer */
+  draw_topbar(&buffer);
   print_lines(&buffer);
   draw_footer(&buffer);
 
@@ -136,7 +139,7 @@ void refresh_screen()
   buf_append(&buffer, buf, strlen(buf));
 
   write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
-  buf_free(&buffer); /* free buffer */
+  buf_free(&buffer);
 }
 
 void set_status_message(const char *ftime, ...)

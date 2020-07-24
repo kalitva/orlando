@@ -2,20 +2,20 @@
 
 
 /* output.c */
-void refresh_screen();
-void set_status_message(const char*, ...);
+void refresh_screen(void);
+void set_status_message(const char *, ...);
 /* terminal.c */
-int read_key();
+int read_key(void);
 /* editor.c */
 void insert_char(int);
 void delete_char(void);
 void insert_line(void);
 void delete_line(void);
 /* editor file_io.c */
-void editor_save();
+void editor_save(void);
 /* lnklist.c */
-void head_to_next(t_list*);
-void head_to_previous(t_list*);
+void head_to_next(t_list *);
+void head_to_previous(t_list *);
 
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
@@ -61,6 +61,20 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
     }
 }
 
+void top_line_to_up()
+{
+	g_state.top_line = g_state.top_line->previous;
+	g_state.top_line_number--;
+	g_state.cursor_Y++;
+}
+
+void top_line_to_down()
+{
+	g_state.top_line = g_state.top_line->next;
+	g_state.top_line_number++;
+	g_state.cursor_Y--;
+}
+
 void cursor_to_up()
 {
   if (!g_lines->head->previous)
@@ -74,6 +88,9 @@ void cursor_to_up()
   g_state.cursor_X = g_state.cursor_X > line->len
                    ? line->len
                    : g_state.cursor_X;
+
+  if (g_state.cursor_Y < 0)
+  	top_line_to_up();
 }
 
 void cursor_to_down()
@@ -89,6 +106,9 @@ void cursor_to_down()
   g_state.cursor_X = g_state.cursor_X > line->len
                    ? line->len
                    : g_state.cursor_X;
+
+  if (g_state.cursor_Y > g_state.screen_rows - 1)
+  	top_line_to_down();
 }
 
 void cursor_to_left()
@@ -130,6 +150,9 @@ void cursor_to_end_line()
 
 void cursor_to_start()
 {
+	while (g_lines->head->previous)
+		cursor_to_up();
+
 	g_state.cursor_X = 0;
 	g_state.cursor_Y = 0;
 	g_lines->head = g_lines->first;
@@ -139,7 +162,9 @@ void cursor_to_end()
 {
 	t_line *line = g_lines->last->value;
 
-	g_state.cursor_Y = g_lines->size - 1;
+	while (g_lines->head->next)
+		cursor_to_down();
+
 	g_state.cursor_X = line->len;
 	g_lines->head = g_lines->last;
 }
