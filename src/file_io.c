@@ -46,9 +46,9 @@ void open_file(char *file_name)
   	}
   }
 
-//  delete_line();
+  top_line_to_up();
+  delete_line();
   cursor_to_start();
-  g_state.dirty = false;
 
   fclose(fp);
 }

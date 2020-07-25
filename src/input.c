@@ -63,6 +63,9 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
 
 void top_line_to_up()
 {
+	if (!g_state.top_line->previous)
+		return;
+
 	g_state.top_line = g_state.top_line->previous;
 	g_state.top_line_number--;
 	g_state.cursor_Y++;

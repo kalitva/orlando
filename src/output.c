@@ -35,7 +35,6 @@ void print_line_numbers(struct s_buffer *buffer, int line)
 
 void print_lines(struct s_buffer *buffer)
 {
-  int line_number = 1;
   t_node *current;
 
   current = g_state.top_line;
@@ -53,7 +52,9 @@ void print_lines(struct s_buffer *buffer)
   }
 
   /* fill empty space */
-  for (int y = g_lines->size; y < g_state.screen_rows; y++) {
+  for (int y = g_lines->size; 
+  		 y < g_state.screen_rows + g_state.top_line_number - 1; 
+  		 y++) {
     buf_append(buffer, "\x1b[K", 3);
     buf_append(buffer, "\r\n", 2);
   }

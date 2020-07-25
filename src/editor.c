@@ -9,9 +9,10 @@ void remove_last(t_list *);
 void remove_head(t_list *);
 bool is_empty(t_list *);
 void head_to_next(t_list *);
+/* input.c */
+void cursor_to_end_line(void);
 
-
-t_line* new_line()
+t_line *new_line()
 {
   t_line *line = malloc(sizeof(t_line));
 
@@ -62,6 +63,9 @@ void delete_line()
   if (g_lines->size == 1)
     return;
 
+  if (g_state.top_line == g_lines->last)
+    return;
+
   if (g_lines->head == g_lines->first) {
 
     remove_first(g_lines);
@@ -73,13 +77,21 @@ void delete_line()
     remove_last(g_lines);
     g_lines->head = g_lines->last;
     g_state.cursor_Y--;
+    cursor_to_end_line();
 
   } else {
+
+    if (g_state.top_line == g_lines->head) {
+      g_state.top_line = g_lines->first;
+
+      for (int i = 0; i < g_state.top_line_number; i++)
+        g_state.top_line = g_state.top_line->next;
+    }
 
     remove_head(g_lines);
     g_lines->head = g_lines->first;
 
-    for (int i = 0; i < g_state.cursor_Y; i++)
+    for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++)
       g_lines->head = g_lines->head->next;
   }
 }
@@ -135,7 +147,7 @@ void delete_char()
 
     g_lines->head = g_lines->first;
 
-    for (int i = 0; i < g_state.cursor_Y; i++)
+    for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++)
       g_lines->head = g_lines->head->next;
 
     return;
