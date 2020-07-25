@@ -1,4 +1,4 @@
-objects = main.o terminal.o highlighting.o editor.o file_io.o output.o input.o lnklist.o
+objects = main.o terminal.o highlighting.o editor.o file_io.o output.o input.o lnklist.o cursor.o
 
 orlando: $(objects)
 		$(CC) $(objects) -g -o orlando -O0 -Wall -Wextra -pedantic -std=c99
@@ -17,6 +17,8 @@ output.o: src/output.c src/defines.h
 	$(CC) -c -g src/output.c
 input.o: src/input.c src/defines.h
 	$(CC) -c -g src/input.c
+cursor.o: src/cursor.c src/defines.h
+	$(CC) -c -g src/cursor.c
 lnklist.o: src/lnklist.c src/defines.h
 	$(CC) -c -g src/lnklist.c
 

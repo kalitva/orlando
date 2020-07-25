@@ -1,9 +1,6 @@
 #include "defines.h"
 
 
-/* output.c */
-void refresh_screen(void);
-void set_status_message(const char *, ...);
 /* terminal.c */
 int read_key(void);
 /* editor.c */
@@ -11,11 +8,22 @@ void insert_char(int);
 void delete_char(void);
 void insert_line(void);
 void delete_line(void);
+/* cursor.c */
+void cursor_to_up(void);
+void cursor_to_down(void);
+void cursor_to_left(void);
+void cursor_to_right(void);
+void page_up(void);
+void page_down(void);
+void cursor_to_start_line(void);
+void cursor_to_end_line(void);
+void cursor_to_start(void);
+void cursor_to_end(void);
 /* editor file_io.c */
 void editor_save(void);
-/* lnklist.c */
-void head_to_next(t_list *);
-void head_to_previous(t_list *);
+/* output.c */
+void refresh_screen(void);
+void set_status_message(const char *, ...);
 
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
@@ -59,117 +67,6 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
         if (callback)
             callback(buf, ch);
     }
-}
-
-void top_line_to_up()
-{
-	if (!g_state.top_line->previous)
-		return;
-
-	g_state.top_line = g_state.top_line->previous;
-	g_state.top_line_number--;
-	g_state.cursor_Y++;
-}
-
-void top_line_to_down()
-{
-	g_state.top_line = g_state.top_line->next;
-	g_state.top_line_number++;
-	g_state.cursor_Y--;
-}
-
-void cursor_to_up()
-{
-  if (!g_lines->head->previous)
-    return;
-
-  t_line *line;
-
-  head_to_previous(g_lines);  
-  line = g_lines->head->value;
-  g_state.cursor_Y--;
-  g_state.cursor_X = g_state.cursor_X > line->len
-                   ? line->len
-                   : g_state.cursor_X;
-
-  if (g_state.cursor_Y < 0)
-  	top_line_to_up();
-}
-
-void cursor_to_down()
-{
-  if (!g_lines->head->next)
-    return;
-
-  t_line *line;
-
-  head_to_next(g_lines);
-  line = g_lines->head->value;
-  g_state.cursor_Y++;
-  g_state.cursor_X = g_state.cursor_X > line->len
-                   ? line->len
-                   : g_state.cursor_X;
-
-  if (g_state.cursor_Y > g_state.screen_rows - 1)
-  	top_line_to_down();
-}
-
-void cursor_to_left()
-{
-  t_line *line;
-
-  if (g_state.cursor_X > 0) {
-    g_state.cursor_X--;
-  } else if (g_state.cursor_Y != 0) {
-    cursor_to_up();
-    line = g_lines->head->value;
-    g_state.cursor_X = line->len;
-  }
-}
-
-void cursor_to_right()
-{
-  t_line *line = g_lines->head->value;
-
-  if (g_state.cursor_X < line->len) {
-    g_state.cursor_X++;
-  } else if (g_lines->head != g_lines->last) {
-    cursor_to_down();
-    g_state.cursor_X = (g_state.cursor_Y != 0) ? 0 : g_state.cursor_X;
-  }
-}
-
-void cursor_to_start_line()
-{
-	g_state.cursor_X = 0;
-}
-
-void cursor_to_end_line()
-{
-	t_line *line = g_lines->head->value;
-
-	g_state.cursor_X = line->len;
-}
-
-void cursor_to_start()
-{
-	while (g_lines->head->previous)
-		cursor_to_up();
-
-	g_state.cursor_X = 0;
-	g_state.cursor_Y = 0;
-	g_lines->head = g_lines->first;
-}
-
-void cursor_to_end()
-{
-	t_line *line = g_lines->last->value;
-
-	while (g_lines->head->next)
-		cursor_to_down();
-
-	g_state.cursor_X = line->len;
-	g_lines->head = g_lines->last;
 }
 
 bool is_pair(int ch)
@@ -253,7 +150,11 @@ void process_keypress()
       break;
 
     case PAGE_UP:
+    	page_up();
+    	break;
+
     case PAGE_DOWN:
+      page_down();
       break;
 
     case ARROW_UP:

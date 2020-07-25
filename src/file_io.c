@@ -9,6 +9,8 @@ void cursor_to_start(void);
 /* editor.c */
 void insert_line(void);
 void delete_line(void);
+/* cursor.c */
+void top_line_to_up(void);
 /* output.c */
 void set_status_message(const char *, ...);
 /* lnklist.c */
@@ -46,8 +48,8 @@ void open_file(char *file_name)
   	}
   }
 
-  top_line_to_up();
-  delete_line();
+//  top_line_to_up();
+//  delete_line();
   cursor_to_start();
 
   fclose(fp);

@@ -64,7 +64,7 @@ void delete_line()
     return;
 
   if (g_state.top_line == g_lines->last)
-    return;
+    cursor_to_up();
 
   if (g_lines->head == g_lines->first) {
 
