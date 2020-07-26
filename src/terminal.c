@@ -16,9 +16,8 @@ void die(const char *s)
 
 void enable_screen()
 {
-  tcgetattr(STDIN_FILENO, &orig_termios); /* get old terminal settings and */
-                                          /* save them in <orig_termios> */
-  /* set raw_mode */
+  tcgetattr(STDIN_FILENO, &orig_termios);
+
   struct termios raw_mode = orig_termios;
   
   raw_mode.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);

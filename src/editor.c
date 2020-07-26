@@ -10,7 +10,13 @@ void remove_head(t_list *);
 bool is_empty(t_list *);
 void head_to_next(t_list *);
 /* input.c */
+void cursor_to_start_line(void);
 void cursor_to_end_line(void);
+void cursor_to_up(void);
+/* syntax.c */
+bool is_pair(int);
+int find_pair(int);
+
 
 t_line *new_line()
 {
@@ -50,6 +56,7 @@ void insert_line()
     line->len--;
   }
 
+  cursor_to_start_line();
   insert_node(g_lines, new);
 }
 
@@ -100,24 +107,23 @@ void insert_char(int ch)
 {
   t_line *line = g_lines->head->value;
 
-  if (!line->str)
+  if (!line->str) {
     line->str = malloc(sizeof(int) * line->capacity);
-
-  if (line->len > line->capacity - 1) { /* increase memory */
+  } else if (line->len > line->capacity - 1) {
     line->capacity *= 1.5;
     line->str = realloc(line->str, line->capacity * sizeof(int));
   }
 
-  if (g_state.cursor_X == line->len) {  /* append char and return */
+  if (g_state.cursor_X == line->len) {
     line->str[line->len++] = ch;
     return;
   }
-                                                /* or move chars to right */
+
   for (int i = line->len - 1; i >= g_state.cursor_X; i--) 
     line->str[i + 1] = line->str[i];
 
-  line->str[g_state.cursor_X] = ch;             /* and insert char */
-  line->len++;                /*increase sring length */
+  line->str[g_state.cursor_X] = ch;
+  line->len++;
 }
 
 void delete_char()

@@ -19,12 +19,13 @@ void cursor_to_start_line(void);
 void cursor_to_end_line(void);
 void cursor_to_start(void);
 void cursor_to_end(void);
-/* editor file_io.c */
+/* file_io.c */
 void editor_save(void);
 /* output.c */
 void refresh_screen(void);
 void set_status_message(const char *, ...);
-
+/* syntax.c */
+void insert(int);
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
 {
@@ -69,26 +70,6 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int))
     }
 }
 
-bool is_pair(int ch)
-{
-  return ch == '{' || ch == '(' || ch == '[' || ch == '"' || ch == '\'';
-}
-
-int find_pair(int ch)
-{
-  switch (ch) {
-    case '{':
-      return '}';
-    case '(':
-      return ')';
-    case '[':
-      return ']';
-    case '"':
-    case '\'':
-      return ch;
-  }
-}
-
 void process_keypress()
 {
   static int quit_times = 2;
@@ -96,7 +77,7 @@ void process_keypress()
 
   switch (ch) {
 
-    case '\r':                                    /* next line */
+    case '\r':
       insert_line();
       cursor_to_down();
       break;
@@ -176,9 +157,8 @@ void process_keypress()
     case '\x1b':
       break;
 
-    default: 
-      insert_char(ch); 
-      cursor_to_right();
+    default:
+    	insert(ch);
       break;
   }
 
