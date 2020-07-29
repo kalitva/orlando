@@ -1,19 +1,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+/* input.c */
+void cursor_to_start_line(void);
+void cursor_to_end_line(void);
+void cursor_to_up(void);
 /* lnklist.c */
 void append_node(t_list *, void *);
 void insert_node(t_list *, void *);
 void remove_first(t_list *);
 void remove_last(t_list *);
 void remove_head(t_list *);
-bool is_empty(t_list *);
+bool is_empty_list(t_list *);
 void head_to_next(t_list *);
-/* input.c */
-void cursor_to_start_line(void);
-void cursor_to_end_line(void);
-void cursor_to_up(void);
 /* syntax.c */
 bool is_pair(int);
 int find_pair(int);
@@ -42,7 +41,7 @@ void insert_line()
   t_line *line;
   t_line *new = new_line();
 
-  if (is_empty(g_lines)) {  /* first insertion */
+  if (is_empty_list(g_lines)) {  /* first insertion */
     append_node(g_lines, new);
     return;
   }

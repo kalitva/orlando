@@ -44,6 +44,15 @@ typedef struct {
 	void *previous;
 } t_node;
 
+typedef struct {
+  int value;
+  void *previous;
+} t_item;
+
+typedef struct {
+  t_item *top;
+} t_stack;
+
 typedef struct  {
 	t_node *head;
 	t_node *first;

@@ -2,10 +2,16 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 /* editor.c */
 void insert_char(int);
 /* cursor.c */
 void cursor_to_right(void);
+/* stack.c */
+t_stack *new_stack(void);
+void push(t_stack *, int);
+int pop(t_stack *);
+int peek(t_stack *);
 
 
 char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
@@ -46,18 +52,27 @@ int get_closing_char(int ch)
 
 void insert(int ch)
 {
-  static int closing_char;
+  static t_stack *stack;
+  int closing_char;
+  int previous_char;
 
-  if (is_opening_char(ch)) {
+  if (!stack) {
+    stack = new_stack();
+  }
+
+  previous_char = peek(stack);
+
+  if (is_opening_char(ch) && previous_char != '"' && previous_char != '\'') {
 
     insert_char(ch);
     cursor_to_right();
     insert_char(closing_char = get_closing_char(ch));
+    push(stack, closing_char);
 
-  } else if (ch == closing_char) {
+  } else if (ch == previous_char) {
 
     cursor_to_right();
-    closing_char = 0;
+    pop(stack);
 
   } else {  
 

@@ -1,4 +1,4 @@
-objects = main.o terminal.o syntax.o editor.o file_io.o output.o input.o lnklist.o cursor.o
+objects = main.o terminal.o editor.o  cursor.o file_io.o output.o input.o lnklist.o stack.o syntax.o 
 
 orlando: $(objects)
 	$(CC) $(objects) -g -o orlando -O0 -Wall -Wextra -pedantic -std=c99
@@ -22,6 +22,8 @@ input.o: io/input.c global.h
 
 lnklist.o: dtypes/lnklist.c global.h
 	$(CC) -c -g dtypes/lnklist.c -include global.h
+stack.o: dtypes/stack.c global.h
+	$(CC) -c -g dtypes/stack.c -include global.h
 
 syntax.o: syntax.c global.h
 	$(CC) -c -g syntax.c -include global.h

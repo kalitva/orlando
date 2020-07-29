@@ -1,11 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
-
-#include "dtypes.h"
-
-
-/*lnklist.c */
-t_node *new_node(void *);
 
 
 t_stack *new_stack()
@@ -19,11 +12,11 @@ t_stack *new_stack()
 
 void push(t_stack *stack, int value)
 {
-	t_node *node = malloc(sizeof(t_node));
-	node->value = value;
+	t_item *item = malloc(sizeof(t_item));
+	item->value = value;
 
-	node->previous = stack->top;
-	stack->top = node;
+	item->previous = stack->top;
+	stack->top = item;
 }
 
 int pop(t_stack *stack)
@@ -33,7 +26,7 @@ int pop(t_stack *stack)
 	}
 
 	int value;
-	t_node *top;
+	t_item *top;
 
 	value = stack->top->value;
 	top = stack->top;
@@ -45,15 +38,7 @@ int pop(t_stack *stack)
 	return value;
 }
 
-int main()
+int peek(t_stack *stack)
 {
-	t_stack *stack = new_stack();
-
-	for (int i = 0; i < 10; i++) {
-		push(stack, i);
-	}
-
-	for (int i = 1; i < 15; i++) {
-		printf("%d \n", pop(stack));
-	}
+	return stack->top ? stack->top->value : 0;
 }

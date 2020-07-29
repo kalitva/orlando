@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 
-bool is_empty(t_list *list)
+bool is_empty_list(t_list *list)
 {
 	return list->last == NULL || list->first == NULL;
 }
@@ -41,7 +41,7 @@ void append_node(t_list *list, void *value)
 {
 	t_node *node = new_node(value);
 
-	if (is_empty(list)) {
+	if (is_empty_list(list)) {
 		list->first = node;
 		list->last = node;
 	} else {
@@ -57,7 +57,7 @@ void prepend_node(t_list *list, void *value)
 {
 	t_node *node = new_node(value);
 
-	if (is_empty(list)) {
+	if (is_empty_list(list)) {
 		list->first = node;
 		list->last = node;
 	} else {
@@ -94,7 +94,7 @@ void insert_node(t_list *list, void *value)
 
 void remove_last(t_list *list)
 {
-	if (is_empty(list)) {
+	if (is_empty_list(list)) {
 		return;
 	}
 
@@ -112,7 +112,7 @@ void remove_last(t_list *list)
 
 void remove_first(t_list *list)
 {
-	if (is_empty(list)) {
+	if (is_empty_list(list)) {
 		return;
 	}
 
@@ -130,7 +130,7 @@ void remove_first(t_list *list)
 
 void remove_head(t_list *list)
 {
-	if (is_empty(list) || !list->head) {
+	if (is_empty_list(list) || !list->head) {
 		return;
 	}
 
