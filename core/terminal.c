@@ -1,18 +1,17 @@
-#include "defines.h"
+#include <termios.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+
+
+/*output.c */
+void refresh_screen(void);
 
 
 struct termios orig_termios;
 struct termios raw_mode;
 
-
-void die(const char *s)
-{
-    write(STDOUT_FILENO, "\x1b[2J", 4);
-    write(STDOUT_FILENO, "\x1b[H", 3);
-
-    perror(s);
-    exit(1);
-}
 
 void enable_screen()
 {
@@ -25,7 +24,7 @@ void enable_screen()
   raw_mode.c_cflag &= ~(CS8);
   raw_mode.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
   raw_mode.c_cc[VMIN] = 0;
-  raw_mode.c_cc[VTIME] = 1;
+  raw_mode.c_cc[VTIME] = 5;
 
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw_mode);
 }
@@ -35,10 +34,30 @@ void disable_screen()
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
+void get_window_size(int *rows, int *cols)
+{
+  struct winsize params;
+
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &params); /* get window parameters */
+
+  *cols = params.ws_col; /* and save them in the global state */
+  *rows = (params.ws_row - 2);
+}
+
 int read_key()
 {
   char ch;
-  while(!read(STDIN_FILENO, &ch, 1));
+  int screen_rows;
+  int screen_cols;
+
+  while (!read(STDIN_FILENO, &ch, 1)) {
+    get_window_size(&screen_rows, &screen_cols);
+
+    if (g_state.screen_rows != screen_rows 
+        || g_state.screen_cols != screen_cols) {
+      refresh_screen();
+    }
+  }
 
   if (ch == '\x1b') {
     char seq[3];
@@ -101,14 +120,4 @@ int read_key()
       
         return ch;
     }
-}
-
-void get_window_size(int *rows, int *cols)
-{
-  struct winsize params;
-
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &params); /* get window parameters */
-
-  *cols = params.ws_col; /* and save them in the global state */
-  *rows = (params.ws_row - 2);
 }

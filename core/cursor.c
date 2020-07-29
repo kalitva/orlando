@@ -1,4 +1,4 @@
-#include "defines.h"
+#include <unistd.h>
 
 
 /* lnklist.c */
@@ -10,8 +10,9 @@ void refresh_screen(void);
 
 void top_line_to_up()
 {
-	if (!g_state.top_line->previous)
+	if (!g_state.top_line->previous) {
 		return;
+  }
 
 	g_state.top_line = g_state.top_line->previous;
 	g_state.top_line_number--;
@@ -20,8 +21,9 @@ void top_line_to_up()
 
 void top_line_to_down()
 {
-  if (!g_state.top_line->next)
+  if (!g_state.top_line->next) {
     return;
+  }
 
 	g_state.top_line = g_state.top_line->next;
 	g_state.top_line_number++;
@@ -30,8 +32,9 @@ void top_line_to_down()
 
 void cursor_to_up()
 {
-  if (!g_lines->head->previous)
+  if (!g_lines->head->previous) {
     return;
+  }
 
   t_line *line;
 
@@ -42,14 +45,16 @@ void cursor_to_up()
                    ? line->len
                    : g_state.cursor_X;
 
-  if (g_state.cursor_Y < 0)
+  if (g_state.cursor_Y < 0) {
   	top_line_to_up();
+  }
 }
 
 void cursor_to_down()
 {
-  if (!g_lines->head->next)
+  if (!g_lines->head->next) {
     return;
+  }
 
   t_line *line;
 
@@ -60,8 +65,9 @@ void cursor_to_down()
                    ? line->len
                    : g_state.cursor_X;
 
-  if (g_state.cursor_Y > g_state.screen_rows - 1)
+  if (g_state.cursor_Y > g_state.screen_rows - 1) {
   	top_line_to_down();
+  }
 }
 
 void cursor_to_left()

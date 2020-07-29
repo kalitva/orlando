@@ -1,4 +1,5 @@
-#include "defines.h"
+#include <stdlib.h>
+#include <string.h>
 
 
 /* lnklist.c */
@@ -48,7 +49,7 @@ void insert_line()
 
   line = g_lines->head->value;
 
-  new->len = line->len - g_state.cursor_X;
+  new->len = (line->len - g_state.cursor_X);
 
   for (int i = 0; i < new->len; i++) {
     new->str[i] = line->str[g_state.cursor_X + i];
@@ -67,11 +68,13 @@ void delete_line()
   free_line(line);
   g_state.cursor_X = 0;
 
-  if (g_lines->size == 1)
+  if (g_lines->size == 1) {
     return;
+  }
 
-  if (g_state.top_line == g_lines->last)
+  if (g_state.top_line == g_lines->last) {
     cursor_to_up();
+  }
 
   if (g_lines->head == g_lines->first) {
 
@@ -98,8 +101,10 @@ void delete_line()
     remove_head(g_lines);
     g_lines->head = g_lines->first;
 
-    for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++)
+    for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++) {
       g_lines->head = g_lines->head->next;
+    }
+
   }
 }
 
@@ -119,8 +124,9 @@ void insert_char(int ch)
     return;
   }
 
-  for (int i = line->len - 1; i >= g_state.cursor_X; i--) 
+  for (int i = line->len - 1; i >= g_state.cursor_X; i--) {
     line->str[i + 1] = line->str[i];
+  }
 
   line->str[g_state.cursor_X] = ch;
   line->len++;
@@ -133,8 +139,9 @@ void delete_char()
 
   line = g_lines->head->value;
 
-  if (line->len == g_state.cursor_X && g_lines->head == g_lines->last)
+  if (line->len == g_state.cursor_X && g_lines->head == g_lines->last) {
     return;
+  }
 
   if (line->len == 0) {
     delete_line();
@@ -153,14 +160,16 @@ void delete_char()
 
     g_lines->head = g_lines->first;
 
-    for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++)
+    for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++) {
       g_lines->head = g_lines->head->next;
+    }
 
     return;
   }
 
-  for (int i = g_state.cursor_X; i < line->len; i++) /* move chars to left */
+  for (int i = g_state.cursor_X; i < line->len; i++) { /* move chars to left */
     line->str[i] = line->str[i + 1];
+  }
 
   line->str[line->len - 1] = 0; /* delete char */
   line->len--;

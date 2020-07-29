@@ -1,26 +1,30 @@
 objects = main.o terminal.o syntax.o editor.o file_io.o output.o input.o lnklist.o cursor.o
 
 orlando: $(objects)
-		$(CC) $(objects) -g -o orlando -O0 -Wall -Wextra -pedantic -std=c99
+	$(CC) $(objects) -g -o orlando -O0 -Wall -Wextra -pedantic -std=c99
 
-main.o: src/main.c src/defines.h
-	$(CC) -c -g src/main.c
-terminal.o: src/terminal.c src/defines.h
-	$(CC) -c -g src/terminal.c
-syntax.o: src/syntax.c src/defines.h
-	$(CC) -c -g src/syntax.c
-editor.o: src/editor.c src/defines.h
-	$(CC) -c -g src/editor.c
-file_io.o: src/file_io.c src/defines.h
-	$(CC) -c -g src/file_io.c
-output.o: src/output.c src/defines.h
-	$(CC) -c -g src/output.c
-input.o: src/input.c src/defines.h
-	$(CC) -c -g src/input.c
-cursor.o: src/cursor.c src/defines.h
-	$(CC) -c -g src/cursor.c
-lnklist.o: src/lnklist.c src/defines.h
-	$(CC) -c -g src/lnklist.c
+main.o: main.c global.h
+	$(CC) -c -g main.c
+
+terminal.o: core/terminal.c global.h
+	$(CC) -c -g core/terminal.c -include global.h
+editor.o: core/editor.c global.h
+	$(CC) -c -g core/editor.c -include global.h
+cursor.o: core/cursor.c global.h
+	$(CC) -c -g core/cursor.c -include global.h
+
+file_io.o: io/file_io.c global.h
+	$(CC) -c -g io/file_io.c -include global.h
+output.o: io/output.c global.h
+	$(CC) -c -g io/output.c -include global.h
+input.o: io/input.c global.h
+	$(CC) -c -g io/input.c -include global.h
+
+lnklist.o: dtypes/lnklist.c global.h
+	$(CC) -c -g dtypes/lnklist.c -include global.h
+
+syntax.o: syntax.c global.h
+	$(CC) -c -g syntax.c -include global.h
 
 clean:
 	rm $(objects)

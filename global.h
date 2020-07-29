@@ -1,26 +1,6 @@
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
 #include <stdbool.h>
 
 #define TAB 2
-
-#define CTRL_KEY(k) ((k) & 0x1f)
-
-#define HL_HIGHLIGHT_NUMBERS (1<<0)
-#define HL_HIGHLLIGHT_STRINGS (1<<1)
-#define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
-
-#define BUF_INIT { NULL, 0 }
 
 enum editor_key {
   BACKSPACE = 127,

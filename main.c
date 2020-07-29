@@ -1,4 +1,7 @@
-#include "defines.h"
+#include <stdlib.h>
+#include <stdbool.h>
+
+#include "global.h"
 
 
 /* terminal.c */
@@ -12,11 +15,12 @@ void refresh_screen(void);
 /* input.c */
 void process_keypress(void);
 /* lnklist.c */
-t_list* new_list(void);
+t_list *new_list(void);
 void init_head(t_list *);
 /* editor.c */
 void insert_line(void);
 void init_top_line(void);
+
 
 void init()
 {
@@ -34,7 +38,7 @@ void init()
   g_state.top_line_number = 1;
 
   set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
-  enable_screen();      /* set terminal */
+  enable_screen();
   atexit(disable_screen);
 }
 
@@ -42,11 +46,13 @@ int main(int argc, char *argv[])
 {
   init(); 
     
-  if (argc >= 2)        /* open file */
+  if (argc >= 2) {
     open_file(argv[1]);
+  }
 
   refresh_screen();
 
-  while (true)          /* listen input */
+  while (true) {
     process_keypress();
+  }
 }

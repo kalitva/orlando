@@ -1,4 +1,4 @@
-#include "defines.h"
+#include <stdlib.h>
 
 
 bool is_empty(t_list *list)
@@ -71,8 +71,9 @@ void prepend_node(t_list *list, void *value)
 
 void insert_node(t_list *list, void *value)
 {
-	if (!list->head)
+	if (!list->head) {
 		return;
+	}
 
 	if (list->head == list->last) {
 		append_node(list, value);
@@ -93,15 +94,17 @@ void insert_node(t_list *list, void *value)
 
 void remove_last(t_list *list)
 {
-	if (is_empty(list))
+	if (is_empty(list)) {
 		return;
+	}
 
 	t_node *tmp = list->last;
 
 	list->last = list->last->previous;
 
-	if (list->last)
+	if (list->last) {
 		list->last->next = NULL;
+	}
 
 	list->size--;
 	free_node(tmp);
@@ -109,15 +112,17 @@ void remove_last(t_list *list)
 
 void remove_first(t_list *list)
 {
-	if (is_empty(list))
+	if (is_empty(list)) {
 		return;
+	}
 
 	t_node *tmp = list->first;
 
 	list->first = list->first->next;
 
-	if (list->first)
+	if (list->first) {
 		list->first->previous = NULL;
+	}
 
 	list->size--;
 	free_node(tmp);
@@ -125,13 +130,13 @@ void remove_first(t_list *list)
 
 void remove_head(t_list *list)
 {
-	if (is_empty(list) || !list->head)
+	if (is_empty(list) || !list->head) {
 		return;
+	}
 
 	if (list->head == list->first) {
 		remove_first(list);
 		return;
-
 	} else	if (list->head == list->last) {
 		remove_last(list);
 		return;
@@ -144,27 +149,29 @@ void remove_head(t_list *list)
 	head_previous->next = list->head->next;
 	head_next->previous = list->head->previous;
 
-//	list->head = list->head->next;
 	list->size--;
 	free_node(tmp);
 }
 
 void init_head(t_list *list)
 {
-	if (list)
+	if (list) {
 		list->head = list->last;
-	else
+	}	else {
 		return;
+	}
 }
 
 void head_to_next(t_list *list)
 {
-	if (list->head)
+	if (list->head) {
 		list->head = list->head->next ? list->head->next : list->head;
+	}
 }
 
 void head_to_previous(t_list *list)
 {
-	if (list->head)
+	if (list->head) {
 		list->head = list->head->previous ? list->head->previous : list->head;
+	}
 }

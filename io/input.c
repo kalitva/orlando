@@ -1,4 +1,8 @@
-#include "defines.h"
+#include <ctype.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define CTRL_KEY(k) ((k) & 0x1f)
 
 
 /* terminal.c */
@@ -26,6 +30,7 @@ void refresh_screen(void);
 void set_status_message(const char *, ...);
 /* syntax.c */
 void insert(int);
+
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
 {
@@ -93,7 +98,6 @@ void process_keypress()
       }
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
-//      print_content();
       exit(0);
       break;
 

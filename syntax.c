@@ -1,7 +1,10 @@
-#include "defines.h"
+#include <ctype.h>
+#include <string.h>
+#include <stdbool.h>
 
-
+/* editor.c */
 void insert_char(int);
+/* cursor.c */
 void cursor_to_right(void);
 
 
@@ -60,36 +63,6 @@ void insert(int ch)
 
     insert_char(ch); 
     cursor_to_right();
-  }
-}
-
-int editor_syntax_to_color(int hl)
-{
-  switch (hl) {
-    
-    case HL_COMMENT:
-      return 30;
-
-    case HL_MLCOMMENT:
-      return 30;
-
-    case HL_KEYWORD1:
-      return 33;
-
-    case HL_KEYWORD2:
-      return 34;
-
-    case HL_STRING:
-      return 36;
-
-    case HL_NUMBER:
-      return 33;
-
-    case HL_MATCH:
-      return 34;
-
-    default:
-      return 37;
   }
 }
 

@@ -1,4 +1,10 @@
-#include "defines.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BUF_INIT { NULL, 0 }
 
 
 /* terminal.c */
@@ -9,8 +15,9 @@ void buf_append(struct s_buffer *buffer, const char *str, int len)
 {
   char *new = realloc(buffer->str, buffer->len + len);
 
-  if (new == NULL)
+  if (new == NULL) {
     return;
+  }
 
   memcpy(&new[buffer->len], str, len);
   buffer->str = new;
@@ -81,10 +88,12 @@ void draw_topbar(struct s_buffer *buffer)
   char space_left[space_left_length];
   char space_right[space_right_length];
 
-  for (int i = 0; i < space_left_length; i++)
+  for (int i = 0; i < space_left_length; i++) {
     space_left[i] = ' ';
-  for (int i = 0; i < space_right_length; i++)
+  }
+  for (int i = 0; i < space_right_length; i++) {
     space_right[i] = ' ';
+  }
 
   /* append all */
   buf_append(buffer, space_left, space_left_length);
@@ -107,8 +116,9 @@ void draw_footer(struct s_buffer *buffer)
   
   int space_len = (g_state.screen_cols - msg_len - cursor_len); /* empty space */
   char space[space_len];
-  for (int i = 0; i < space_len; i++)
+  for (int i = 0; i < space_len; i++) {
     space[i] = ' ';
+  }
 
   buf_append(buffer, "\x1b[7m", 4); /* put footer in buffer */
   buf_append(buffer, g_state.status_msg, msg_len);
