@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <string.h>
 
 /* input.c */
 void cursor_to_down(void);
@@ -23,6 +23,7 @@ void open_file(char *file_name)
 
   if (!fp) {
     fp = fopen(file_name, "w"); /* create file */
+    g_state.is_new_file = true;
     return;
   }
   
@@ -39,9 +40,29 @@ void open_file(char *file_name)
   }
 
   cursor_to_start();
+  cursor_to_end_line();
   fclose(fp);
 }
 
-void editor_save()
+void save_file()
 {
+  FILE *fp;
+
+  if (!g_state.file_name) {
+    g_state.file_name = "Noname";
+  }
+
+  fp = fopen(g_state.file_name, "w");
+
+  for (t_node *current = g_lines->first; 
+       current->next; 
+       current = current->next) {
+    fprintf(fp, "%s\n", ((t_line *) (current->value))->str);
+  }
+  fprintf(fp, "%s", ((t_line *) (g_lines->last->value))->str);
+
+  g_state.status_msg = " File saved";
+  g_state.dirty = false;
+
+  fclose(fp);
 }
