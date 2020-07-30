@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "types.h"
 
 t_stack *new_stack()
 {

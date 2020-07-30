@@ -1,12 +1,18 @@
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 
 /* editor.c */
 void insert_char(int);
+void insert_line(void);
 /* cursor.c */
+void cursor_to_up(void);
+void cursor_to_down(void);
 void cursor_to_right(void);
+void cursor_to_start_line(void);
+void cursor_to_end_line(void);
 /* stack.c */
 t_stack *new_stack(void);
 void push(t_stack *, int);
@@ -81,6 +87,50 @@ void insert(int ch)
   }
 }
 
-void editor_select_syntax_highlight()
+void insert_tab()
 {
+  int tab_size = g_config.tab_size;
+
+  while (tab_size--) {
+    insert_char(' ');
+    cursor_to_right();
+  }
+}
+  
+void indentation()
+{
+  t_line *previous;
+  int count = 0;
+  int i = 0;
+
+  if (!g_lines->head->previous) {
+    return;
+  }
+
+  previous = ((t_node *) g_lines->head->previous)->value;
+ 
+  while (previous->str[count] == ' ') {
+    count++;
+  }
+
+  while (i++ < count) {
+    insert_char(' ');
+    cursor_to_right();
+  }
+
+  if (previous->str[previous->len - 1] == '{') {
+
+    insert_line();
+    insert_tab();
+
+    cursor_to_down();
+    cursor_to_start_line();
+
+    while (count--) {
+      insert_char(' ');
+    }
+
+    cursor_to_up();
+    cursor_to_end_line();
+  }
 }

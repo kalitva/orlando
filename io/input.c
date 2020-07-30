@@ -30,6 +30,8 @@ void refresh_screen(void);
 void set_status_message(const char *, ...);
 /* syntax.c */
 void insert(int);
+void insert_tab();
+void indentation();
 
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int))
@@ -85,9 +87,11 @@ void process_keypress()
     case '\r':
       insert_line();
       cursor_to_down();
+      indentation();
       break;
 
     case '\t':
+      insert_tab();
       break;
 
     case CTRL_KEY('q'):                           /* quit */

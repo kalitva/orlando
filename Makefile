@@ -21,9 +21,9 @@ input.o: io/input.c global.h
 	$(CC) -c -g io/input.c -include global.h
 
 lnklist.o: dtypes/lnklist.c global.h
-	$(CC) -c -g dtypes/lnklist.c -include global.h
+	$(CC) -c -g dtypes/lnklist.c
 stack.o: dtypes/stack.c global.h
-	$(CC) -c -g dtypes/stack.c -include global.h
+	$(CC) -c -g dtypes/stack.c
 
 syntax.o: syntax.c global.h
 	$(CC) -c -g syntax.c -include global.h

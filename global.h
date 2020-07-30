@@ -1,8 +1,9 @@
 #include <stdbool.h>
 
-#define TAB 2
+#include "dtypes/types.h"
 
-enum editor_key {
+
+enum e_keys {
   BACKSPACE = 127,
   ARROW_LEFT = 1000,
   ARROW_RIGHT,
@@ -14,51 +15,6 @@ enum editor_key {
   PAGE_UP,
   PAGE_DOWN
 };
-
-enum editor_highlight {
-  HL_NORMAL = 0,
-  HL_COMMENT,
-  HL_MLCOMMENT,
-  HL_KEYWORD1,
-  HL_KEYWORD2,
-  HL_STRING,
-  HL_NUMBER,
-  HL_MATCH
-};
-
-
-struct s_buffer {
-  char *str;
-  int len;
-};
-
-typedef struct {
-  int capacity;
-  int len;
-  char *str;
-} t_line;
-
-typedef struct {
-	void *value;
-	void *next;
-	void *previous;
-} t_node;
-
-typedef struct {
-  int value;
-  void *previous;
-} t_item;
-
-typedef struct {
-  t_item *top;
-} t_stack;
-
-typedef struct  {
-	t_node *head;
-	t_node *first;
-	t_node *last;
-	int size;
-} t_list;
 
 struct s_state {
   int cursor_X;
@@ -72,6 +28,11 @@ struct s_state {
   bool dirty;
 };
 
+struct s_config {
+  int tab_size;
+};
+
 
 struct s_state g_state;
+struct s_config g_config;
 t_list *g_lines;

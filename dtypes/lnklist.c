@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
+#include "types.h"
 
 bool is_empty_list(t_list *list)
 {

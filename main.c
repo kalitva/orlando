@@ -26,6 +26,8 @@ void init()
 {
   g_lines = new_list(); /* global variable for text */
 
+  g_config.tab_size = 2;
+
   g_state.cursor_X = 0;
   g_state.cursor_Y = 0;
   g_state.dirty = false;
