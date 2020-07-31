@@ -22,7 +22,7 @@ t_line *new_line()
 {
   t_line *line = malloc(sizeof(t_line));
 
-  line->str = malloc(sizeof(int) * 80);
+  line->str = calloc(80, sizeof(int));
   line->capacity = 80;
   line->len = 0;
 
@@ -111,9 +111,7 @@ void insert_char(int ch)
 {
   t_line *line = g_lines->head->value;
 
-  if (!line->str) {
-    line->str = malloc(sizeof(int) * line->capacity);
-  } else if (line->len > line->capacity - 1) {
+  if (line->len > line->capacity - 1) {
     line->capacity *= 1.5;
     line->str = realloc(line->str, line->capacity * sizeof(int));
   }

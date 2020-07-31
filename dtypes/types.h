@@ -1,3 +1,6 @@
+#include <stdbool.h>
+
+
 struct s_buffer {
   char *str;
   int len;

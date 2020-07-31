@@ -20,9 +20,9 @@ output.o: io/output.c global.h
 input.o: io/input.c global.h
 	$(CC) -c -g io/input.c -include global.h
 
-lnklist.o: dtypes/lnklist.c global.h
+lnklist.o: dtypes/lnklist.c dtypes/types.h
 	$(CC) -c -g dtypes/lnklist.c
-stack.o: dtypes/stack.c global.h
+stack.o: dtypes/stack.c dtypes/types.h
 	$(CC) -c -g dtypes/stack.c
 
 syntax.o: syntax.c global.h

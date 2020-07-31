@@ -1,6 +1,6 @@
-#include <stdbool.h>
-
 #include "dtypes/types.h"
+
+#define MAIN_MESSAGE " quit: Ctrl-Q | info: Ctrl-I"
 
 
 enum e_keys {
@@ -23,9 +23,10 @@ struct s_state {
   int screen_cols;
   t_node *top_line;
   int top_line_number;
-  char *file_name;
-  char status_msg[80];
+  bool is_new_file;
   bool dirty;
+  char *file_name;
+  char *status_msg;
 };
 
 struct s_config {

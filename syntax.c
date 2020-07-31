@@ -100,7 +100,8 @@ void insert_tab()
 void indentation()
 {
   t_line *previous;
-  int count = 0;
+
+  int offset = 0;
   int i = 0;
 
   if (!g_lines->head->previous) {
@@ -109,11 +110,11 @@ void indentation()
 
   previous = ((t_node *) g_lines->head->previous)->value;
  
-  while (previous->str[count] == ' ') {
-    count++;
+  while (previous->str[offset] == ' ') {
+    offset++;
   }
 
-  while (i++ < count) {
+  while (i++ < offset) {
     insert_char(' ');
     cursor_to_right();
   }
@@ -126,7 +127,7 @@ void indentation()
     cursor_to_down();
     cursor_to_start_line();
 
-    while (count--) {
+    while (--i > 0) {
       insert_char(' ');
     }
 

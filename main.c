@@ -31,7 +31,8 @@ void init()
   g_state.cursor_X = 0;
   g_state.cursor_Y = 0;
   g_state.dirty = false;
-  g_state.status_msg[0] = '\0';
+  g_state.is_new_file = false;
+  g_state.status_msg = MAIN_MESSAGE;
 
   insert_line();  /* insert first empty line */
   init_head(g_lines);
@@ -39,7 +40,6 @@ void init()
   g_state.top_line = g_lines->first;
   g_state.top_line_number = 1;
 
-  set_status_message(" Quit: Ctrl + 'q' "); /* message for footer */
   enable_screen();
   atexit(disable_screen);
 }

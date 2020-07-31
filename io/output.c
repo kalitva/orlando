@@ -69,7 +69,7 @@ void print_lines(struct s_buffer *buffer)
 
 void draw_topbar(struct s_buffer *buffer)
 {
-  buf_append(buffer, "\x1b[7m", 4); /* invent colors */
+  buf_append(buffer, "\x1b[1m", 4); /* invent colors */
 
   char header[20];
   int space_left_length;
@@ -82,23 +82,17 @@ void draw_topbar(struct s_buffer *buffer)
                                g_state.dirty ? '*' : ' ');
 
   /* make white spaces around header */
-  space_left_length = (g_state.screen_cols - header_length) / 2;
-  space_right_length = (g_state.screen_cols - space_left_length - header_length);
+  space_left_length = (g_state.screen_cols - header_length);
 
   char space_left[space_left_length];
-  char space_right[space_right_length];
 
   for (int i = 0; i < space_left_length; i++) {
     space_left[i] = ' ';
-  }
-  for (int i = 0; i < space_right_length; i++) {
-    space_right[i] = ' ';
   }
 
   /* append all */
   buf_append(buffer, space_left, space_left_length);
   buf_append(buffer, header, header_length);
-  buf_append(buffer, space_right, space_right_length);
   buf_append(buffer, "\x1b[m", 3); /* invent colors back */
   buf_append(buffer, "\r\n", 2);
 }
@@ -120,12 +114,14 @@ void draw_footer(struct s_buffer *buffer)
     space[i] = ' ';
   }
 
-  buf_append(buffer, "\x1b[7m", 4); /* put footer in buffer */
+  buf_append(buffer, "\x1b[34m", 5); /* put footer in buffer */
   buf_append(buffer, g_state.status_msg, msg_len);
   buf_append(buffer, space, space_len - 1);
   buf_append(buffer, cursor, cursor_len);
   buf_append(buffer, " ", 1);
   buf_append(buffer, "\x1b[m", 4);
+
+  g_state.status_msg = MAIN_MESSAGE;
 }
 
 void refresh_screen()
@@ -136,15 +132,15 @@ void refresh_screen()
 
   buf_append(&buffer, "\x1b[H", 3);
 
-  draw_topbar(&buffer);
   print_lines(&buffer);
+  draw_topbar(&buffer);
   draw_footer(&buffer);
 
   char buf[16];   /* find cursor position */
   snprintf(buf,
            sizeof(buf),
            "\x1b[%d;%dH",
-           g_state.cursor_Y + 2,
+           g_state.cursor_Y + 1,
            g_state.cursor_X + (g_lines->size < 1000 ? 5 : 6));
 
   buf_append(&buffer, buf, strlen(buf));
