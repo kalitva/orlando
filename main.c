@@ -1,12 +1,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <unistd.h>
+
 #include "global.h"
 
 
 /* terminal.c */
 void enable_screen(void);
-void disable_screen(void);
+void enable_mouse_tracking(void);
 /* file_io.c */
 void open_file(char *);
 /* output.c */
@@ -15,8 +17,8 @@ void refresh_screen(void);
 /* input.c */
 void process_keypress(void);
 /* lnklist.c */
-t_list *new_list(void);
-void init_head(t_list *);
+list_t *new_list(void);
+void init_head(list_t *);
 /* editor.c */
 void insert_line(void);
 void init_top_line(void);
@@ -41,7 +43,7 @@ void init()
   g_state.top_line_number = 1;
 
   enable_screen();
-  atexit(disable_screen);
+  enable_mouse_tracking();
 }
 
 int main(int argc, char *argv[])

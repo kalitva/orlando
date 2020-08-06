@@ -13,7 +13,9 @@ enum e_keys {
   HOME_KEY,
   END_KEY,
   PAGE_UP,
-  PAGE_DOWN
+  PAGE_DOWN,
+  CTRL_HOME_KEY,
+  CTRL_END_KEY
 };
 
 struct s_state {
@@ -21,7 +23,7 @@ struct s_state {
   int cursor_Y;
   int screen_rows;
   int screen_cols;
-  t_node *top_line;
+  node_t *top_line;
   int top_line_number;
   bool is_new_file;
   bool dirty;
@@ -36,4 +38,4 @@ struct s_config {
 
 struct s_state g_state;
 struct s_config g_config;
-t_list *g_lines;
+list_t *g_lines;

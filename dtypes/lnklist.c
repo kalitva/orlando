@@ -3,14 +3,14 @@
 
 #include "types.h"
 
-bool is_empty_list(t_list *list)
+bool is_empty_list(list_t *list)
 {
 	return list->last == NULL || list->first == NULL;
 }
 
-t_list* new_list()
+list_t* new_list()
 {
-	t_list *list = malloc(sizeof(t_list));
+	list_t *list = malloc(sizeof(list_t));
 
 	list->first = NULL;
 	list->last = NULL;
@@ -20,9 +20,9 @@ t_list* new_list()
 	return list;
 }
 
-t_node* new_node(void *value)
+node_t* new_node(void *value)
 {
-	t_node *node = malloc(sizeof(t_node));
+	node_t *node = malloc(sizeof(node_t));
 	
 	node->value = value;
 	node->next = NULL;
@@ -31,7 +31,7 @@ t_node* new_node(void *value)
 	return node;
 }
 
-void free_node(t_node *node)
+void free_node(node_t *node)
 {
 	free(node->value);
 	node->value = NULL;
@@ -39,9 +39,9 @@ void free_node(t_node *node)
 	node = NULL;
 }
 
-void append_node(t_list *list, void *value)
+void append_node(list_t *list, void *value)
 {
-	t_node *node = new_node(value);
+	node_t *node = new_node(value);
 
 	if (is_empty_list(list)) {
 		list->first = node;
@@ -55,9 +55,9 @@ void append_node(t_list *list, void *value)
 	list->size++;
 }
 
-void prepend_node(t_list *list, void *value)
+void prepend_node(list_t *list, void *value)
 {
-	t_node *node = new_node(value);
+	node_t *node = new_node(value);
 
 	if (is_empty_list(list)) {
 		list->first = node;
@@ -71,7 +71,7 @@ void prepend_node(t_list *list, void *value)
 	list->size++;
 }
 
-void insert_node(t_list *list, void *value)
+void insert_node(list_t *list, void *value)
 {
 	if (!list->head) {
 		return;
@@ -82,9 +82,9 @@ void insert_node(t_list *list, void *value)
 		return;
 	}
 
-	t_node *node = new_node(value);
-	t_node *head = list->head;
-	t_node *head_next = head->next;
+	node_t *node = new_node(value);
+	node_t *head = list->head;
+	node_t *head_next = head->next;
 
 	node->next = head->next;
 	node->previous = head;
@@ -94,13 +94,13 @@ void insert_node(t_list *list, void *value)
 	list->size++;
 }
 
-void remove_last(t_list *list)
+void remove_last(list_t *list)
 {
 	if (is_empty_list(list)) {
 		return;
 	}
 
-	t_node *tmp = list->last;
+	node_t *tmp = list->last;
 
 	list->last = list->last->previous;
 
@@ -112,13 +112,13 @@ void remove_last(t_list *list)
 	free_node(tmp);
 }
 
-void remove_first(t_list *list)
+void remove_first(list_t *list)
 {
 	if (is_empty_list(list)) {
 		return;
 	}
 
-	t_node *tmp = list->first;
+	node_t *tmp = list->first;
 
 	list->first = list->first->next;
 
@@ -130,7 +130,7 @@ void remove_first(t_list *list)
 	free_node(tmp);
 }
 
-void remove_head(t_list *list)
+void remove_head(list_t *list)
 {
 	if (is_empty_list(list) || !list->head) {
 		return;
@@ -144,9 +144,9 @@ void remove_head(t_list *list)
 		return;
 	}
 
-	t_node *head_previous = list->head->previous;
-	t_node *head_next = list->head->next;
-	t_node *tmp = list->head;
+	node_t *head_previous = list->head->previous;
+	node_t *head_next = list->head->next;
+	node_t *tmp = list->head;
 
 	head_previous->next = list->head->next;
 	head_next->previous = list->head->previous;
@@ -155,7 +155,7 @@ void remove_head(t_list *list)
 	free_node(tmp);
 }
 
-void init_head(t_list *list)
+void init_head(list_t *list)
 {
 	if (list) {
 		list->head = list->last;
@@ -164,14 +164,14 @@ void init_head(t_list *list)
 	}
 }
 
-void head_to_next(t_list *list)
+void head_to_next(list_t *list)
 {
 	if (list->head) {
 		list->head = list->head->next ? list->head->next : list->head;
 	}
 }
 
-void head_to_previous(t_list *list)
+void head_to_previous(list_t *list)
 {
 	if (list->head) {
 		list->head = list->head->previous ? list->head->previous : list->head;

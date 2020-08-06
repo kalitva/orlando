@@ -15,7 +15,7 @@ void open_file(char *file_name)
 {
   char ch;
   FILE *fp;
-  t_line *line;
+  line_t *line;
 
   g_state.file_name = file_name;
   fp = fopen(file_name, "r");
@@ -42,6 +42,8 @@ void open_file(char *file_name)
   cursor_to_start();
   cursor_to_end_line();
   fclose(fp);
+
+  g_state.dirty = false;
 }
 
 void save_file()
@@ -54,12 +56,12 @@ void save_file()
 
   fp = fopen(g_state.file_name, "w");
 
-  for (t_node *current = g_lines->first; 
+  for (node_t *current = g_lines->first; 
        current->next; 
        current = current->next) {
-    fprintf(fp, "%s\n", ((t_line *) (current->value))->str);
+    fprintf(fp, "%s\n", ((line_t *) (current->value))->str);
   }
-  fprintf(fp, "%s", ((t_line *) (g_lines->last->value))->str);
+  fprintf(fp, "%s", ((line_t *) (g_lines->last->value))->str);
 
   g_state.status_msg = " File saved";
   g_state.dirty = false;

@@ -10,26 +10,26 @@ typedef struct {
   int capacity;
   int len;
   char *str;
-} t_line;
+} line_t;
 
 typedef struct {
 	void *value;
 	void *next;
 	void *previous;
-} t_node;
+} node_t;
 
 typedef struct {
   int value;
   void *previous;
-} t_item;
+} item_t;
 
 typedef struct {
-  t_item *top;
-} t_stack;
+  item_t *top;
+} stack_t;
 
 typedef struct  {
-	t_node *head;
-	t_node *first;
-	t_node *last;
+	node_t *head;
+	node_t *first;
+	node_t *last;
 	int size;
-} t_list;
+} list_t;

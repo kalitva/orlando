@@ -34,6 +34,16 @@ void disable_screen()
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
+void enable_mouse_tracking() 
+{
+  write(STDIN_FILENO, "\e[?1000h", 8);
+}
+
+void disable_mouse_tracking()
+{
+  write(STDIN_FILENO, "\e[?1000l", 8);
+}
+
 void get_window_size(int *rows, int *cols)
 {
   struct winsize params;
@@ -44,78 +54,84 @@ void get_window_size(int *rows, int *cols)
   *rows = (params.ws_row - 2);
 }
 
-int read_key()
+int handle_escape_sequence()
 {
-  char ch;
-  int screen_rows;
-  int screen_cols;
+  char sequence[5];
 
-  while (!read(STDIN_FILENO, &ch, 1)) {
-    get_window_size(&screen_rows, &screen_cols);
+  if (!read(STDIN_FILENO, &sequence[0], 1)
+      || !read(STDIN_FILENO, &sequence[1], 1)) {
+    return '\x1b';
+  }
 
-    if (g_state.screen_rows != screen_rows 
-        || g_state.screen_cols != screen_cols) {
-      refresh_screen();
+  if (sequence[1] >= '0' && sequence[1] <= '9') {
+
+    if (!read(STDIN_FILENO, &sequence[2], 1)) {
+      return '\x1b';
     }
-  }
 
-  if (ch != '\x1b') {
-    return ch;
-  }
+    if (sequence[2] == '~') {
 
-  char seq[3];
-
-  if (read(STDIN_FILENO, &seq[0], 1) != 1)
-    return '\x1b';
-  if(read(STDIN_FILENO, &seq[1], 1) != 1)
-    return '\x1b';
-
-  if (seq[0] == '[') {
-
-    if (seq[1] >= '0' && seq[1] <= '9') {
-
-      if (read(STDIN_FILENO, &seq[2], 1) != 1)
-        return '\x1b';
-
-      if (seq[2] == '~') {
-
-        switch (seq[1]) {
-          case '1':
-            return HOME_KEY;
-          case '3':
-            return DEL_KEY;
-          case '4':
-            return END_KEY;
-          case '5':
-            return PAGE_UP;
-          case '6':
-            return PAGE_DOWN;
-          case '7':
-            return HOME_KEY;
-          case '8':
-            return END_KEY;
-        }
+      switch (sequence[1]) {
+        case '3':
+          return DEL_KEY;
+        case '5':
+          return PAGE_UP;
+        case '6':
+          return PAGE_DOWN;
       }
 
-    } else {
+    } else if (sequence[2] == ';') {
 
-      switch (seq[1]) {
-        case 'A':
-          return ARROW_UP;
-        case 'B':
-          return ARROW_DOWN;
-        case 'C':
-          return ARROW_RIGHT;
-        case 'D':
-          return ARROW_LEFT;
+      read(STDIN_FILENO, &sequence[3], 2);
+
+      switch (sequence[4]) {
         case 'H':
-          return HOME_KEY;
-        case 'F':
-          return END_KEY;
+          return CTRL_HOME_KEY;
+        case 'F': 
+          return CTRL_END_KEY;
       }
     }
 
+  } else if (sequence[1] == 'M') {
+
+    read(STDIN_FILENO, &sequence[2], 3);
+
+    switch (sequence[2]) {
+      case '`':
+        return ARROW_UP;
+      case 'a':
+        return ARROW_DOWN;
+      default:
+        return '\x1b';
+    }
+
+  } else {
+
+    switch (sequence[1]) {
+      case 'A':
+        return ARROW_UP;
+      case 'B':
+        return ARROW_DOWN;
+      case 'C':
+        return ARROW_RIGHT;
+      case 'D':
+        return ARROW_LEFT;
+      case 'H':
+        return HOME_KEY;
+      case 'F':
+        return END_KEY;
+    }
   }
 
-    return '\x1b';
+}
+
+void quit()
+{
+  disable_screen();
+  disable_mouse_tracking();
+
+  write(STDOUT_FILENO, "\x1b[H", 3);
+  write(STDOUT_FILENO, "\x1b[2J", 4);
+
+  exit(0);
 }

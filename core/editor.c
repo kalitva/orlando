@@ -6,21 +6,21 @@ void cursor_to_start_line(void);
 void cursor_to_end_line(void);
 void cursor_to_up(void);
 /* lnklist.c */
-void append_node(t_list *, void *);
-void insert_node(t_list *, void *);
-void remove_first(t_list *);
-void remove_last(t_list *);
-void remove_head(t_list *);
-bool is_empty_list(t_list *);
-void head_to_next(t_list *);
+void append_node(list_t *, void *);
+void insert_node(list_t *, void *);
+void remove_first(list_t *);
+void remove_last(list_t *);
+void remove_head(list_t *);
+bool is_empty_list(list_t *);
+void head_to_next(list_t *);
 /* syntax.c */
 bool is_pair(int);
 int find_pair(int);
 
 
-t_line *new_line()
+line_t *new_line()
 {
-  t_line *line = malloc(sizeof(t_line));
+  line_t *line = malloc(sizeof(line_t));
 
   line->str = calloc(80, sizeof(int));
   line->capacity = 80;
@@ -29,7 +29,7 @@ t_line *new_line()
   return line;
 }
 
-void free_line(t_line *line)
+void free_line(line_t *line)
 {
   free(line->str);
   line->str = NULL;
@@ -38,8 +38,8 @@ void free_line(t_line *line)
 
 void insert_line()
 {
-  t_line *line;
-  t_line *new = new_line();
+  line_t *line;
+  line_t *new = new_line();
 
   if (is_empty_list(g_lines)) {  /* first insertion */
     append_node(g_lines, new);
@@ -58,11 +58,13 @@ void insert_line()
 
   cursor_to_start_line();
   insert_node(g_lines, new);
+
+  g_state.dirty++;
 }
 
 void delete_line()
 {
-  t_line *line = g_lines->head->value;
+  line_t *line = g_lines->head->value;
 
   free_line(line);
   g_state.cursor_X = 0;
@@ -105,11 +107,13 @@ void delete_line()
     }
 
   }
+
+  g_state.dirty++;
 }
 
 void insert_char(int ch)
 {
-  t_line *line = g_lines->head->value;
+  line_t *line = g_lines->head->value;
 
   if (line->len > line->capacity - 1) {
     line->capacity *= 1.5;
@@ -118,6 +122,7 @@ void insert_char(int ch)
 
   if (g_state.cursor_X == line->len) {
     line->str[line->len++] = ch;
+    g_state.dirty++;
     return;
   }
 
@@ -127,12 +132,14 @@ void insert_char(int ch)
 
   line->str[g_state.cursor_X] = ch;
   line->len++;
+
+  g_state.dirty++;
 }
 
 void delete_char()
 {
-  t_line *line;
-  t_line *next_line;
+  line_t *line;
+  line_t *nexline_t;
 
   line = g_lines->head->value;
 
@@ -148,10 +155,10 @@ void delete_char()
   if (line->len == g_state.cursor_X) {
 
     head_to_next(g_lines);
-    next_line = g_lines->head->value;
+    nexline_t = g_lines->head->value;
 
-    strcat(line->str, next_line->str);
-    line->len += next_line->len;
+    strcat(line->str, nexline_t->str);
+    line->len += nexline_t->len;
 
     remove_head(g_lines);
 
@@ -170,4 +177,6 @@ void delete_char()
 
   line->str[line->len - 1] = 0; /* delete char */
   line->len--;
+
+  g_state.dirty++;
 }

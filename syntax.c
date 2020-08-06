@@ -14,10 +14,10 @@ void cursor_to_right(void);
 void cursor_to_start_line(void);
 void cursor_to_end_line(void);
 /* stack.c */
-t_stack *new_stack(void);
-void push(t_stack *, int);
-int pop(t_stack *);
-int peek(t_stack *);
+stack_t *new_stack(void);
+void push(stack_t *, int);
+int pop(stack_t *);
+int peek(stack_t *);
 
 
 char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
@@ -58,7 +58,7 @@ int get_closing_char(int ch)
 
 void insert(int ch)
 {
-  static t_stack *stack;
+  static stack_t *stack;
   int closing_char;
   int previous_char;
 
@@ -99,7 +99,7 @@ void insert_tab()
   
 void indentation()
 {
-  t_line *previous;
+  line_t *previous;
 
   int offset = 0;
   int i = 0;
@@ -108,7 +108,7 @@ void indentation()
     return;
   }
 
-  previous = ((t_node *) g_lines->head->previous)->value;
+  previous = ((node_t *) g_lines->head->previous)->value;
  
   while (previous->str[offset] == ' ') {
     offset++;

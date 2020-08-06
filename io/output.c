@@ -31,25 +31,25 @@ void buf_free(struct s_buffer *buffer)
 
 void print_line_numbers(struct s_buffer *buffer, int line)
 {
-  char line_number[6]; /* make number */
-  sprintf(line_number, g_lines->size < 1000 ? "%3d " : "%4d ", line);
+  char line_number[7]; /* make number */
+  sprintf(line_number, g_lines->size < 1000 ? "%3d| " : "%4d| ", line);
 
-  buf_append(buffer, "\x1b[m", 3);
-  buf_append(buffer, "\x1b[30m", 5); /* color gray */
-  buf_append(buffer, line_number, 5);
+  buf_append(buffer, "\x1b[2m", 4);
+  buf_append(buffer, line_number, g_lines->size < 1000 ? 5 : 6);
   buf_append(buffer, "\x1b[m", 3);
 }
 
 void print_lines(struct s_buffer *buffer)
 {
-  t_node *current;
+  node_t *current;
+  line_t *line;
 
   current = g_state.top_line;
 
   for (int y = 0; y < g_state.screen_rows && current; y++) {
   	print_line_numbers(buffer, g_state.top_line_number + y);	
 
-  	t_line *line = current->value;
+  	line = current->value;
   	buf_append(buffer, line->str, line->len);
 
     buf_append(buffer, "\x1b[K", 3);
@@ -77,9 +77,9 @@ void draw_topbar(struct s_buffer *buffer)
 
   int header_length = snprintf(header, /* make header */
                                sizeof(header),
-                               "%.20s%c",
-                               g_state.file_name ? g_state.file_name : "[No Name]",
-                               g_state.dirty ? '*' : ' ');
+                               "%c%.20s ",
+                               g_state.dirty ? '*' : ' ',
+                               g_state.file_name ? g_state.file_name : "[No Name]");
 
   /* make white spaces around header */
   space_left_length = (g_state.screen_cols - header_length);
@@ -100,15 +100,14 @@ void draw_topbar(struct s_buffer *buffer)
 void draw_footer(struct s_buffer *buffer)
 {
   char cursor[23]; /* make string, that contents line and column nimbers */
-  int cursor_len = snprintf(cursor, 
-              sizeof cursor, 
+  int cursor_len; sprintf(cursor, 
               "line: %d column: %d", 
               g_state.cursor_Y + g_state.top_line_number,
               g_state.cursor_X + 1);
   
   int msg_len = strlen(g_state.status_msg);
   
-  int space_len = (g_state.screen_cols - msg_len - cursor_len); /* empty space */
+  int space_len = (g_state.screen_cols - msg_len - strlen(cursor)); /* empty space */
   char space[space_len];
   for (int i = 0; i < space_len; i++) {
     space[i] = ' ';
@@ -117,7 +116,7 @@ void draw_footer(struct s_buffer *buffer)
   buf_append(buffer, "\x1b[34m", 5); /* put footer in buffer */
   buf_append(buffer, g_state.status_msg, msg_len);
   buf_append(buffer, space, space_len - 1);
-  buf_append(buffer, cursor, cursor_len);
+  buf_append(buffer, cursor, strlen(cursor));
   buf_append(buffer, " ", 1);
   buf_append(buffer, "\x1b[m", 4);
 
@@ -136,12 +135,11 @@ void refresh_screen()
   draw_topbar(&buffer);
   draw_footer(&buffer);
 
-  char buf[16];   /* find cursor position */
-  snprintf(buf,
-           sizeof(buf),
+  char buf[16];   /* set cursor position */
+  sprintf(buf,
            "\x1b[%d;%dH",
            g_state.cursor_Y + 1,
-           g_state.cursor_X + (g_lines->size < 1000 ? 5 : 6));
+           g_state.cursor_X + (g_lines->size < 1000 ? 6 : 7));
 
   buf_append(&buffer, buf, strlen(buf));
 

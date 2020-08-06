@@ -2,11 +2,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <termios.h>
+
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 
 /* terminal.c */
-int read_key(void);
+void get_window_size(int *, int *);
+int handle_escape_sequence(void);
+int handle_mouse_event();
+void quit(void);
 /* editor.c */
 void insert_char(int);
 void delete_char(void);
@@ -34,9 +39,32 @@ void insert_tab(void);
 void indentation(void);
 
 
+int read_key()
+{
+  char ch;
+  int screen_rows;
+  int screen_cols;
+
+  while (!read(STDIN_FILENO, &ch, 1)) { /* listen to input */
+
+    get_window_size(&screen_rows, &screen_cols);
+
+    if (g_state.screen_rows != screen_rows 
+        || g_state.screen_cols != screen_cols) {
+      refresh_screen();
+    }
+  }
+
+  if (ch == '\x1b') {
+    return handle_escape_sequence();
+  } else {
+    return ch;
+  }
+
+}
+
 void process_keypress()
 {
-  static int quit_times = 2;
   int ch = read_key();
 
   switch (ch) {
@@ -51,17 +79,6 @@ void process_keypress()
       insert_tab();
       break;
 
-    case CTRL_KEY('q'):                           /* quit */
-      if (g_state.dirty && quit_times > 0) {
-        set_status_message("WARNING! File has unsaved changes!", quit_times);
-          quit_times--;
-          return;
-      }
-      write(STDOUT_FILENO, "\x1b[2J", 4);
-      write(STDOUT_FILENO, "\x1b[H", 3);
-      exit(0);
-      break;
-
     case CTRL_KEY('s'):
       save_file();
       break;
@@ -74,11 +91,11 @@ void process_keypress()
     	cursor_to_end_line();
       break;
 
-    case CTRL_KEY('h'):
+    case CTRL_HOME_KEY:
     	cursor_to_start();
     	break;
 
-    case CTRL_KEY('e'):
+    case CTRL_END_KEY:
     	cursor_to_end();
     	break;	
 
@@ -119,12 +136,14 @@ void process_keypress()
       cursor_to_right();
       break;
 
+    case CTRL_KEY('q'):                           /* quit */
+      quit();
+
     case '\x1b':
       break;
 
     default:
     	insert(ch);
-      break;
   }
 
   refresh_screen();

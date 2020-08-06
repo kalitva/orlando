@@ -2,32 +2,32 @@
 
 #include "types.h"
 
-t_stack *new_stack()
+stack_t *new_stack()
 {
-	t_stack *stack = malloc(sizeof(t_stack));
+	stack_t *stack = malloc(sizeof(stack_t));
 
 	stack->top = NULL;
 
 	return stack;
 }
 
-void push(t_stack *stack, int value)
+void push(stack_t *stack, int value)
 {
-	t_item *item = malloc(sizeof(t_item));
+	item_t *item = malloc(sizeof(item_t));
 	item->value = value;
 
 	item->previous = stack->top;
 	stack->top = item;
 }
 
-int pop(t_stack *stack)
+int pop(stack_t *stack)
 {
 	if (!stack->top) {
 		return 0;
 	}
 
 	int value;
-	t_item *top;
+	item_t *top;
 
 	value = stack->top->value;
 	top = stack->top;
@@ -39,7 +39,7 @@ int pop(t_stack *stack)
 	return value;
 }
 
-int peek(t_stack *stack)
+int peek(stack_t *stack)
 {
 	return stack->top ? stack->top->value : 0;
 }

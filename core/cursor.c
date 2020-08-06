@@ -2,8 +2,8 @@
 
 
 /* lnklist.c */
-void head_to_next(t_list *);
-void head_to_previous(t_list *);
+void head_to_next(list_t *);
+void head_to_previous(list_t *);
 /* outptu.c */
 void refresh_screen(void);
 
@@ -36,7 +36,7 @@ void cursor_to_up()
     return;
   }
 
-  t_line *line;
+  line_t *line;
 
   head_to_previous(g_lines);  
   line = g_lines->head->value;
@@ -56,7 +56,7 @@ void cursor_to_down()
     return;
   }
 
-  t_line *line;
+  line_t *line;
 
   head_to_next(g_lines);
   line = g_lines->head->value;
@@ -72,7 +72,7 @@ void cursor_to_down()
 
 void cursor_to_left()
 {
-  t_line *line;
+  line_t *line;
 
   if (g_state.cursor_X > 0) {
     g_state.cursor_X--;
@@ -85,7 +85,7 @@ void cursor_to_left()
 
 void cursor_to_right()
 {
-  t_line *line = g_lines->head->value;
+  line_t *line = g_lines->head->value;
 
   if (g_state.cursor_X < line->len) {
     g_state.cursor_X++;
@@ -123,15 +123,15 @@ void cursor_to_start_line()
 
 void cursor_to_end_line()
 {
-	t_line *line = g_lines->head->value;
+	line_t *line = g_lines->head->value;
 
 	g_state.cursor_X = line->len;
 }
 
 void cursor_to_start()
 {
-  int delay = g_lines->size < 200 ? 5000 
-            : g_lines->size < 1000 ? 1000 : 10;
+  int delay = g_lines->size < 200 ? 1000 
+            : g_lines->size < 1000 ? 300 : 10;
 
 	while (g_lines->head->previous) {
 		cursor_to_up();
@@ -146,9 +146,9 @@ void cursor_to_start()
 
 void cursor_to_end()
 {
-	t_line *line = g_lines->last->value;
-  int delay = g_lines->size < 200 ? 5000 
-            : g_lines->size < 1000 ? 1000 : 10;
+	line_t *line = g_lines->last->value;
+  int delay = g_lines->size < 200 ? 1000 
+            : g_lines->size < 1000 ? 300 : 10;
             
 	while (g_lines->head->next) {
 		cursor_to_down();
