@@ -43,7 +43,7 @@ void init()
   g_state.top_line_number = 1;
 
   enable_screen();
-  enable_mouse_tracking();
+
 }
 
 int main(int argc, char *argv[])

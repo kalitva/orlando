@@ -34,16 +34,6 @@ void disable_screen()
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
-void enable_mouse_tracking() 
-{
-  write(STDIN_FILENO, "\e[?1000h", 8);
-}
-
-void disable_mouse_tracking()
-{
-  write(STDIN_FILENO, "\e[?1000l", 8);
-}
-
 void get_window_size(int *rows, int *cols)
 {
   struct winsize params;
@@ -93,7 +83,7 @@ int handle_escape_sequence()
     }
 
   } else if (sequence[1] == 'M') {
-
+/*
     read(STDIN_FILENO, &sequence[2], 3);
 
     switch (sequence[2]) {
@@ -104,7 +94,7 @@ int handle_escape_sequence()
       default:
         return '\x1b';
     }
-
+*/
   } else {
 
     switch (sequence[1]) {
@@ -128,7 +118,6 @@ int handle_escape_sequence()
 void quit()
 {
   disable_screen();
-  disable_mouse_tracking();
 
   write(STDOUT_FILENO, "\x1b[H", 3);
   write(STDOUT_FILENO, "\x1b[2J", 4);
