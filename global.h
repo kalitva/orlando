@@ -1,5 +1,7 @@
 #include "dtypes/types.h"
 
+#include <ncurses.h>
+
 #define MAIN_MESSAGE " quit: Ctrl-Q | info: Ctrl-I"
 
 

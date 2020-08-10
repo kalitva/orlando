@@ -2,18 +2,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <termios.h>
-
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 
 /* terminal.c */
-void get_window_size(int *, int *);
-int handle_escape_sequence(void);
-int handle_mouse_event();
 void quit(void);
 /* editor.c */
-void insert_char(int);
 void delete_char(void);
 void insert_line(void);
 void delete_line(void);
@@ -32,44 +26,19 @@ void cursor_to_end(void);
 void save_file(void);
 /* output.c */
 void refresh_screen(void);
-void set_status_message(const char *, ...);
 /* syntax.c */
 void insert(int);
 void insert_tab(void);
 void indentation(void);
 
 
-int read_key()
-{
-  char ch;
-  int screen_rows;
-  int screen_cols;
-
-  while (!read(STDIN_FILENO, &ch, 1)) { /* listen to input */
-
-    get_window_size(&screen_rows, &screen_cols);
-
-    if (g_state.screen_rows != screen_rows 
-        || g_state.screen_cols != screen_cols) {
-      refresh_screen();
-    }
-  }
-
-  if (ch == '\x1b') {
-    return handle_escape_sequence();
-  } else {
-    return ch;
-  }
-
-}
-
 void process_keypress()
 {
-  int ch = read_key();
+  int ch = getch();
 
   switch (ch) {
 
-    case '\r':
+    case KEY_ENTER:
       insert_line();
       cursor_to_down();
       indentation();
@@ -83,19 +52,19 @@ void process_keypress()
       save_file();
       break;
 
-    case HOME_KEY:
+    case KEY_HOME:
     	cursor_to_start_line();
       break;
 
-    case END_KEY:
+    case KEY_END:
     	cursor_to_end_line();
       break;
 
-    case CTRL_HOME_KEY:
+    case 535: //CTRL_HOME_KEY:
     	cursor_to_start();
     	break;
 
-    case CTRL_END_KEY:
+    case 530: //CTRL_END_KEY:
     	cursor_to_end();
     	break;	
 
@@ -103,12 +72,12 @@ void process_keypress()
       delete_line();
       break;
 
-    case BACKSPACE:
+    case KEY_BACKSPACE:
       cursor_to_left();
       delete_char();
       break;
 
-    case DEL_KEY:
+    case 330: //KEY_DEL:
       delete_char();
       break;
 
@@ -120,23 +89,23 @@ void process_keypress()
       page_down();
       break;
 
-    case ARROW_UP:
+    case KEY_UP:
       cursor_to_up();
       break;
 
-    case ARROW_DOWN:
+    case KEY_DOWN:
       cursor_to_down();
       break;
 
-    case ARROW_LEFT:
+    case KEY_LEFT:
       cursor_to_left();
       break;
 
-    case ARROW_RIGHT:
+    case KEY_RIGHT:
       cursor_to_right();
       break;
 
-    case CTRL_KEY('q'):                           /* quit */
+    case CTRL_KEY('q'):
       quit();
 
     case '\x1b':

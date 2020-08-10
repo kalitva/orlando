@@ -1,8 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <unistd.h>
-
+#include <ncurses.h>
 #include "global.h"
 
 
@@ -12,7 +11,6 @@ void enable_mouse_tracking(void);
 /* file_io.c */
 void open_file(char *);
 /* output.c */
-void set_status_message(const char *, ...);
 void refresh_screen(void);
 /* input.c */
 void process_keypress(void);
@@ -42,8 +40,12 @@ void init()
   g_state.top_line = g_lines->first;
   g_state.top_line_number = 1;
 
-  enable_screen();
-
+  initscr();
+  raw();
+  getmaxyx(stdscr, g_state.screen_rows, g_state.screen_cols);
+  keypad(stdscr, TRUE);
+  noecho();
+  refresh();
 }
 
 int main(int argc, char *argv[])

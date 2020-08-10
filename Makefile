@@ -1,7 +1,7 @@
 objects = main.o terminal.o editor.o  cursor.o file_io.o output.o input.o lnklist.o stack.o syntax.o 
 
 orlando: $(objects)
-	$(CC) $(objects) -g -o orlando -O0 -Wall -Wextra -pedantic -std=c99
+	$(CC) $(objects) -g -o orlando -O0 -Wall -Wextra -pedantic -lncurses -std=c99
 
 main.o: main.c global.h
 	$(CC) -c -g main.c

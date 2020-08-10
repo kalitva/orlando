@@ -15,7 +15,6 @@ bool is_empty_list(list_t *);
 void head_to_next(list_t *);
 /* syntax.c */
 bool is_pair(int);
-int find_pair(int);
 
 
 line_t *new_line()
