@@ -41,3 +41,5 @@ struct s_config {
 struct s_state g_state;
 struct s_config g_config;
 list_t *g_lines;
+WINDOW *text_area;
+WINDOW *footer;

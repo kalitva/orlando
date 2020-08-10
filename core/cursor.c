@@ -5,7 +5,7 @@
 void head_to_next(list_t *);
 void head_to_previous(list_t *);
 /* outptu.c */
-void refresh_screen(void);
+//void refresh_screen(void);
 
 
 void top_line_to_up()
@@ -101,7 +101,7 @@ void page_up()
     top_line_to_up();
     cursor_to_up();
     usleep(5000);
-    refresh_screen();
+//    refresh_screen();
   }
 }
 
@@ -112,7 +112,7 @@ void page_down()
     top_line_to_down();
     cursor_to_down();
     usleep(5000);
-    refresh_screen();
+//    refresh_screen();
   }
 }
 
@@ -136,7 +136,7 @@ void cursor_to_start()
 	while (g_lines->head->previous) {
 		cursor_to_up();
     usleep(delay);
-    refresh_screen();
+//    refresh_screen();
   }
 
 	g_state.cursor_X = 0;
@@ -153,7 +153,7 @@ void cursor_to_end()
 	while (g_lines->head->next) {
 		cursor_to_down();
     usleep(delay);
-    refresh_screen();
+//    refresh_screen();
   }
 
 	g_state.cursor_X = line->len;

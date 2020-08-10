@@ -11,10 +11,6 @@
 void refresh_screen(void);
 
 
-struct termios orig_termios;
-struct termios raw_mode;
-
-
 void get_window_size(int *rows, int *cols)
 {
   struct winsize params;
@@ -27,8 +23,6 @@ void get_window_size(int *rows, int *cols)
 
 void quit()
 {
-//  disable_screen();
   endwin();
   exit(0);
-
 }

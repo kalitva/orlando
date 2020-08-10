@@ -25,6 +25,7 @@ void cursor_to_end(void);
 /* file_io.c */
 void save_file(void);
 /* output.c */
+void print(void);
 void refresh_screen(void);
 /* syntax.c */
 void insert(int);
@@ -34,11 +35,11 @@ void indentation(void);
 
 void process_keypress()
 {
-  int ch = getch();
+  int ch = wgetch(text_area);
 
   switch (ch) {
 
-    case KEY_ENTER:
+    case 10: // KEY_ENTER
       insert_line();
       cursor_to_down();
       indentation();
@@ -115,5 +116,6 @@ void process_keypress()
     	insert(ch);
   }
 
-  refresh_screen();
+//  refresh_screen();
+  print();
 }
