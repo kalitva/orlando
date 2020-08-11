@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <ncurses.h>
 #include "global.h"
 
 /* main.c */
@@ -31,8 +30,6 @@ int main(int argc, char *argv[])
   if (argc >= 2) {
     open_file(argv[1]);
   }
-
-//  refresh_screen();
 
   while (true) {
     process_keypress();

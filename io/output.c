@@ -11,7 +11,7 @@ void print()
 
   current = g_state.top_line;
 
-  for (int y = 0; y < g_state.screen_rows -2 && current; y++) {
+  for (int y = 0; y < g_state.screen_rows && current; y++) {
   	line = current->value;
 
   	mvwprintw(text_area, y, 0, "%s\n", line->str);

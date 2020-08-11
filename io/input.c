@@ -26,7 +26,6 @@ void cursor_to_end(void);
 void save_file(void);
 /* output.c */
 void print(void);
-void refresh_screen(void);
 /* syntax.c */
 void insert(int);
 void insert_tab(void);
@@ -71,6 +70,7 @@ void process_keypress()
 
     case CTRL_KEY('d'):
       delete_line();
+      wclear(text_area);
       break;
 
     case KEY_BACKSPACE:
@@ -82,12 +82,13 @@ void process_keypress()
       delete_char();
       break;
 
-    case PAGE_UP:
+    case KEY_PPAGE:
     	page_up();
     	break;
 
-    case PAGE_DOWN:
+    case KEY_NPAGE:
       page_down();
+      wclear(text_area);
       break;
 
     case KEY_UP:
@@ -116,6 +117,5 @@ void process_keypress()
     	insert(ch);
   }
 
-//  refresh_screen();
   print();
 }

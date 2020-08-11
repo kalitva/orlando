@@ -5,6 +5,7 @@
 void cursor_to_start_line(void);
 void cursor_to_end_line(void);
 void cursor_to_up(void);
+void cursor_to_down(void);
 /* lnklist.c */
 void append_node(list_t *, void *);
 void insert_node(list_t *, void *);
@@ -65,16 +66,22 @@ void delete_line()
 {
   line_t *line = g_lines->head->value;
 
-  free_line(line);
-  g_state.cursor_X = 0;
+  cursor_to_start_line();
 
   if (g_lines->size == 1) {
+
+    while (line->len) {
+      line->str[--line->len] = 0;
+    }
     return;
   }
 
   if (g_state.top_line == g_lines->last) {
     cursor_to_up();
+    cursor_to_down();
   }
+
+  free_line(line);
 
   if (g_lines->head == g_lines->first) {
 
