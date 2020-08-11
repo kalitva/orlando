@@ -5,7 +5,7 @@
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 
-/* terminal.c */
+/* main.c */
 void quit(void);
 /* editor.c */
 void delete_char(void);

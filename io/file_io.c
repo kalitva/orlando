@@ -43,7 +43,6 @@ void open_file(char *file_name)
 
   cursor_to_start();
   cursor_to_end_line();
-  print();
   fclose(fp);
 
   g_state.dirty = false;

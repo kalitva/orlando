@@ -53,6 +53,8 @@ void cursor_to_up()
 void cursor_to_down()
 {
   if (!g_lines->head->next) {
+    wclear(text_area);
+    top_line_to_down();
     return;
   }
 
@@ -111,8 +113,8 @@ void page_down()
   for (int i = 2; i <= g_state.screen_rows; i++) {
     top_line_to_down();
     cursor_to_down();
-    usleep(5000);
     wclear(text_area);
+    usleep(5000);
     print();
   }
 }

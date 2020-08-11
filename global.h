@@ -2,7 +2,7 @@
 
 #include <ncurses.h>
 
-#define MAIN_MESSAGE " quit: Ctrl-Q | info: Ctrl-I"
+#define MAIN_MESSAGE "quit: Ctrl-Q | info: Ctrl-I"
 
 
 struct s_state {
