@@ -1,156 +1,84 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-#define BUF_INIT { NULL, 0 }
-
-
-/* terminal.c */
-void get_window_size(int *, int *);
+#define DEFAULT_COLOR -1
+#define BLUE_TEXT 1
 
 
-void buf_append(struct s_buffer *buffer, const char *str, int len)
+void init_colors()
 {
-  char *new = realloc(buffer->str, buffer->len + len);
+  start_color();
 
-  if (new == NULL) {
-    return;
+  if (use_default_colors() == OK) {
+    init_pair(BLUE_TEXT, COLOR_BLUE, DEFAULT_COLOR);
+  } else {
+    init_pair(BLUE_TEXT, COLOR_BLUE, COLOR_BLUE);
   }
-
-  memcpy(&new[buffer->len], str, len);
-  buffer->str = new;
-  buffer->len += len;
 }
 
-void buf_free(struct s_buffer *buffer)
+void create_text_area()
 {
-  free(buffer->str);
+	text_area = newwin(g_state.screen_rows - 2, g_state.screen_cols, 0, 0);
+  keypad(text_area, TRUE);
 }
 
-void print_line_numbers(struct s_buffer *buffer, int line)
+void create_footer()
 {
-  char line_number[7]; /* make number */
-  sprintf(line_number, g_lines->size < 1000 ? "%3d| " : "%4d| ", line);
-
-  buf_append(buffer, "\x1b[2m", 4);
-  buf_append(buffer, line_number, g_lines->size < 1000 ? 5 : 6);
-  buf_append(buffer, "\x1b[m", 3);
+  footer = newwin(2, g_state.screen_cols, g_state.screen_rows - 2, 0);
 }
 
-void print_lines(struct s_buffer *buffer)
+void print_text()
 {
   node_t *current;
   line_t *line;
 
   current = g_state.top_line;
 
-  for (int y = 0; y < g_state.screen_rows && current; y++) {
-  	print_line_numbers(buffer, g_state.top_line_number + y);	
-
+  for (int y = 0; current; y++) {
   	line = current->value;
-  	buf_append(buffer, line->str, line->len);
 
-    buf_append(buffer, "\x1b[K", 3);
-    buf_append(buffer, "\r\n", 4);
+  	mvwprintw(text_area, y, 0, "%s\n", line->str);
 
     current = current->next;
   }
-
-  /* fill empty space */
-  for (int y = g_lines->size; 
-  		 y < g_state.screen_rows + g_state.top_line_number - 1; 
-  		 y++) {
-    buf_append(buffer, "\x1b[K", 3);
-    buf_append(buffer, "\r\n", 2);
-  }
 }
 
-void draw_topbar(struct s_buffer *buffer)
+void print_footer()
 {
-  buf_append(buffer, "\x1b[1m", 4); /* invent colors */
+  char *file_name;
+  char cursor_position[23];
 
-  char header[20];
-  int space_left_length;
-  int space_right_length;
+  wclear(footer);
 
-  int header_length = snprintf(header, /* make header */
-                               sizeof(header),
-                               "%c%.20s ",
-                               g_state.dirty ? '*' : ' ',
-                               g_state.file_name ? g_state.file_name : "[No Name]");
+  file_name = g_state.file_name ? g_state.file_name : "Noname"; /* move late */
+  sprintf(cursor_position,
+          "Line: %d Column: %d",
+          g_state.top_line_number + g_state.cursor_Y,
+          g_state.cursor_X);
 
-  /* make white spaces around header */
-  space_left_length = (g_state.screen_cols - header_length);
+  wattron(footer, A_BOLD);
+  mvwprintw(footer, 
+            0,
+            g_state.screen_cols - strlen(file_name) - 1,
+            "%s\n", 
+            file_name);
+  wattroff(footer, A_BOLD);
 
-  char space_left[space_left_length];
-
-  for (int i = 0; i < space_left_length; i++) {
-    space_left[i] = ' ';
-  }
-
-  /* append all */
-  buf_append(buffer, space_left, space_left_length);
-  buf_append(buffer, header, header_length);
-  buf_append(buffer, "\x1b[m", 3); /* invent colors back */
-  buf_append(buffer, "\r\n", 2);
+  wattron(footer, COLOR_PAIR(BLUE_TEXT));
+  mvwprintw(footer, 1, 0, "%s", MAIN_MESSAGE);
+  mvwprintw(footer,
+            1,
+            g_state.screen_cols - strlen(cursor_position) - 1,
+            "%s",
+            cursor_position);
+  wattroff(footer, COLOR_PAIR(BLUE_TEXT));
 }
 
-void draw_footer(struct s_buffer *buffer)
+void print()
 {
-  char cursor[23]; /* make string, that contents line and column nimbers */
-  int cursor_len; sprintf(cursor, 
-              "line: %d column: %d", 
-              g_state.cursor_Y + g_state.top_line_number,
-              g_state.cursor_X + 1);
-  
-  int msg_len = strlen(g_state.status_msg);
-  
-  int space_len = (g_state.screen_cols - msg_len - strlen(cursor)); /* empty space */
-  char space[space_len];
-  for (int i = 0; i < space_len; i++) {
-    space[i] = ' ';
-  }
+  print_text();
+  print_footer();
 
-  buf_append(buffer, "\x1b[34m", 5); /* put footer in buffer */
-  buf_append(buffer, g_state.status_msg, msg_len);
-  buf_append(buffer, space, space_len - 1);
-  buf_append(buffer, cursor, strlen(cursor));
-  buf_append(buffer, " ", 1);
-  buf_append(buffer, "\x1b[m", 4);
-
-  g_state.status_msg = MAIN_MESSAGE;
-}
-
-void refresh_screen()
-{
-  struct s_buffer buffer = BUF_INIT;
-
-  get_window_size(&g_state.screen_rows, &g_state.screen_cols);
-
-  buf_append(&buffer, "\x1b[H", 3);
-
-  print_lines(&buffer);
-  draw_topbar(&buffer);
-  draw_footer(&buffer);
-
-  char buf[16];   /* set cursor position */
-  sprintf(buf,
-           "\x1b[%d;%dH",
-           g_state.cursor_Y + 1,
-           g_state.cursor_X + (g_lines->size < 1000 ? 6 : 7));
-
-  buf_append(&buffer, buf, strlen(buf));
-
-  write(STDOUT_FILENO, buffer.str, buffer.len); /* print all */
-  buf_free(&buffer);
-}
-
-void set_status_message(const char *ftime, ...)
-{
-    va_list ap;
-    va_start(ap, ftime);
-    vsnprintf(g_state.status_msg, sizeof(g_state.status_msg), ftime, ap);
-    va_end(ap);
+  wrefresh(text_area);
+  wrefresh(footer);
+  wmove(text_area, g_state.cursor_Y, g_state.cursor_X);
 }

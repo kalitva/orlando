@@ -5,6 +5,7 @@
 void cursor_to_start_line(void);
 void cursor_to_end_line(void);
 void cursor_to_up(void);
+void cursor_to_down(void);
 /* lnklist.c */
 void append_node(list_t *, void *);
 void insert_node(list_t *, void *);
@@ -15,7 +16,6 @@ bool is_empty_list(list_t *);
 void head_to_next(list_t *);
 /* syntax.c */
 bool is_pair(int);
-int find_pair(int);
 
 
 line_t *new_line()
@@ -66,16 +66,22 @@ void delete_line()
 {
   line_t *line = g_lines->head->value;
 
-  free_line(line);
-  g_state.cursor_X = 0;
+  cursor_to_start_line();
 
   if (g_lines->size == 1) {
+
+    while (line->len) {
+      line->str[--line->len] = 0;
+    }
     return;
-  }
+  } /* if only one line in the all file */
 
   if (g_state.top_line == g_lines->last) {
     cursor_to_up();
-  }
+    cursor_to_down();
+  } /* if only one line in the view */
+
+  free_line(line);
 
   if (g_lines->head == g_lines->first) {
 
@@ -93,18 +99,18 @@ void delete_line()
   } else {
 
     if (g_state.top_line == g_lines->head) {
-      g_state.top_line = g_lines->first;
 
+      g_state.top_line = g_lines->first;
       for (int i = 0; i < g_state.top_line_number; i++)
         g_state.top_line = g_state.top_line->next;
-    }
+    } /* find top line, case for first line in the view */ 
 
     remove_head(g_lines);
-    g_lines->head = g_lines->first;
 
+    g_lines->head = g_lines->first;
     for (int i = 1; i < (g_state.cursor_Y + g_state.top_line_number); i++) {
       g_lines->head = g_lines->head->next;
-    }
+    } /* find head */
 
   }
 
@@ -118,13 +124,13 @@ void insert_char(int ch)
   if (line->len > line->capacity - 1) {
     line->capacity *= 1.5;
     line->str = realloc(line->str, line->capacity * sizeof(int));
-  }
+  } /* resize string */
 
   if (g_state.cursor_X == line->len) {
     line->str[line->len++] = ch;
     g_state.dirty++;
     return;
-  }
+  } /* append char */
 
   for (int i = line->len - 1; i >= g_state.cursor_X; i--) {
     line->str[i + 1] = line->str[i];

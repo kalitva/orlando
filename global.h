@@ -1,22 +1,9 @@
 #include "dtypes/types.h"
 
-#define MAIN_MESSAGE " quit: Ctrl-Q | info: Ctrl-I"
+#include <ncurses.h>
 
+#define MAIN_MESSAGE "quit: Ctrl-Q | info: Ctrl-I"
 
-enum e_keys {
-  BACKSPACE = 127,
-  ARROW_LEFT = 1000,
-  ARROW_RIGHT,
-  ARROW_UP,
-  ARROW_DOWN,
-  DEL_KEY,
-  HOME_KEY,
-  END_KEY,
-  PAGE_UP,
-  PAGE_DOWN,
-  CTRL_HOME_KEY,
-  CTRL_END_KEY
-};
 
 struct s_state {
   int cursor_X;
@@ -39,3 +26,5 @@ struct s_config {
 struct s_state g_state;
 struct s_config g_config;
 list_t *g_lines;
+WINDOW *text_area;
+WINDOW *footer;

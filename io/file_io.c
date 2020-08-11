@@ -5,6 +5,8 @@
 void cursor_to_down(void);
 void cursor_to_end_line(void);
 void cursor_to_start(void);
+/* output */
+void print(void);
 /* editor.c */
 void insert_line(void);
 /* cursor.c */
