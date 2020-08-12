@@ -3,6 +3,7 @@
 
 #include "global.h"
 
+
 /* main.c */
 void init(void);
 /* file_io.c */
@@ -20,6 +21,8 @@ void init_head(list_t *);
 /* editor.c */
 void insert_line(void);
 void init_top_line(void);
+/* syntax.c */
+void init_stack(void);
 
 
 int main(int argc, char *argv[])
@@ -42,7 +45,14 @@ void init()
   g_lines = new_list(); /* global variable for text */
 
   g_config.tab_size = 2;
+  g_config.is_spaces_instead_tab = false;
 
+  insert_line();  /* insert first empty line */
+  init_head(g_lines);
+  init_stack();
+
+  g_state.top_line = g_lines->first;
+  g_state.top_line_number = 1;
   g_state.cursor_X = 0;
   g_state.cursor_Y = 0;
   g_state.dirty = false;
@@ -50,19 +60,14 @@ void init()
   g_state.status_msg = MAIN_MESSAGE;
   g_state.file_name = NULL;
 
-  insert_line();  /* insert first empty line */
-  init_head(g_lines);
-
-  g_state.top_line = g_lines->first;
-  g_state.top_line_number = 1;
-
   initscr();
   raw();
+  noecho();
   getmaxyx(stdscr, g_state.screen_rows, g_state.screen_cols);
+
   create_text_area();
   create_footer();
   init_colors();
-  noecho();
 }
 
 void quit()

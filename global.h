@@ -8,6 +8,8 @@
 struct s_state {
   int cursor_X;
   int cursor_Y;
+  int pos_X;
+  int pos_Y;
   int screen_rows;
   int screen_cols;
   node_t *top_line;
@@ -19,6 +21,7 @@ struct s_state {
 };
 
 struct s_config {
+  bool is_spaces_instead_tab;
   int tab_size;
 };
 

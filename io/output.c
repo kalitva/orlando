@@ -82,3 +82,10 @@ void print()
   wrefresh(footer);
   wmove(text_area, g_state.cursor_Y, g_state.cursor_X);
 }
+
+void resize_screen()
+{
+  getmaxyx(stdscr, g_state.screen_rows, g_state.screen_cols);
+  create_text_area();
+  create_footer();
+}

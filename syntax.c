@@ -20,16 +20,12 @@ int pop(stack_t *);
 int peek(stack_t *);
 
 
-char *C_HL_extensions[] = { ".c", ".h", ".cpp", NULL };
-char *C_HL_keywords[] = {
-  "switch", "if", "while", "for", "break", "continue", "return", "else",
-  "struct", "union", "typedef", "static", "enum", "class", "case", 
-  "#include", "#define",
+static stack_t *stack;
 
-  "int|", "long|", "double|", "float|", "char|", "unsigned|", "signed|",
-  "void|", "NULL|", NULL
-};
-
+void init_stack()
+{
+  stack = new_stack();
+}
 
 int is_separator(int ch)
 {
@@ -58,13 +54,8 @@ int get_closing_char(int ch)
 
 void insert(int ch)
 {
-  static stack_t *stack;
   int closing_char;
   int previous_char;
-
-  if (!stack) {
-    stack = new_stack();
-  }
 
   previous_char = peek(stack);
 
@@ -96,42 +87,51 @@ void insert_tab()
     cursor_to_right();
   }
 }
-  
+
 void indentation()
 {
   line_t *previous;
-
   int offset = 0;
-  int i = 0;
 
   if (!g_lines->head->previous) {
+  	insert_tab();
     return;
   }
 
   previous = ((node_t *) g_lines->head->previous)->value;
  
   while (previous->str[offset] == ' ') {
-    offset++;
+  	offset++;
   }
 
-  while (i++ < offset) {
+  if (offset == 0) {
+  	insert_tab();
+  	return;
+  }
+
+  while (offset--) {
     insert_char(' ');
     cursor_to_right();
   }
-
-  if (previous->str[previous->len - 1] == '{') {
-
-    insert_line();
-    insert_tab();
-
-    cursor_to_down();
-    cursor_to_start_line();
-
-    while (--i > 0) {
-      insert_char(' ');
-    }
-
-    cursor_to_up();
-    cursor_to_end_line();
-  }
 }
+
+
+
+
+
+
+
+
+
+
+
+/*
+char *keywords[] = {
+  "switch", "if", "while", "for", "break", "continue", "return", "else",
+  "struct", "union", "typedef", "static", "enum", "class", "case", 
+  "#include", "#define",
+
+  "int", "long", "double", "float", "char", "unsigned", "signed",
+  "void", "NULL", NULL
+};
+*/

@@ -26,6 +26,7 @@ void cursor_to_end(void);
 void save_file(void);
 /* output.c */
 void print(void);
+void resize_screen(void);
 /* syntax.c */
 void insert(int);
 void insert_tab(void);
@@ -41,11 +42,10 @@ void process_keypress()
     case 10: // KEY_ENTER
       insert_line();
       cursor_to_down();
-      indentation();
       break;
 
     case '\t':
-      insert_tab();
+      indentation();
       break;
 
     case CTRL_KEY('s'):
@@ -107,11 +107,12 @@ void process_keypress()
       cursor_to_right();
       break;
 
+    case 410: // Resize of window
+      resize_screen();
+      break;
+
     case CTRL_KEY('q'):
       quit();
-
-    case '\x1b':
-      break;
 
     default:
     	insert(ch);
