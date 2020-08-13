@@ -1,11 +1,6 @@
 #include <stdbool.h>
 
 
-struct s_buffer {
-  char *str;
-  int len;
-};
-
 typedef struct {
   int capacity;
   int len;

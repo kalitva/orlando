@@ -22,7 +22,7 @@ void init_head(list_t *);
 void insert_line(void);
 void init_top_line(void);
 /* syntax.c */
-void init_stack(void);
+void init_brackets_stack(void);
 
 
 int main(int argc, char *argv[])
@@ -45,22 +45,23 @@ void init()
   g_lines = new_list(); /* global variable for text */
 
   g_config.tab_size = 2;
-  g_config.is_spaces_instead_tab = false;
+  g_config.is_spaces_instead_tab = true;
 
   insert_line();  /* insert first empty line */
-  init_head(g_lines);
-  init_stack();
+  init_head(g_lines); /* head always is current line */
+  init_brackets_stack();
 
-  g_state.top_line = g_lines->first;
+  g_state.top_line = g_lines->first; /* top_line - first line for view */
   g_state.top_line_number = 1;
   g_state.cursor_X = 0;
   g_state.cursor_Y = 0;
+  g_state.pos_X = 0;
   g_state.dirty = false;
   g_state.is_new_file = false;
   g_state.status_msg = MAIN_MESSAGE;
   g_state.file_name = NULL;
 
-  initscr();
+  initscr(); /* init ncurses block */
   raw();
   noecho();
   getmaxyx(stdscr, g_state.screen_rows, g_state.screen_cols);

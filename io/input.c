@@ -45,7 +45,8 @@ void process_keypress()
       break;
 
     case '\t':
-      indentation();
+      insert_tab();
+//      indentation();
       break;
 
     case CTRL_KEY('s'):

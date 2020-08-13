@@ -32,12 +32,9 @@ void print_text()
   line_t *line;
 
   current = g_state.top_line;
-
   for (int y = 0; current; y++) {
   	line = current->value;
-
   	mvwprintw(text_area, y, 0, "%s\n", line->str);
-
     current = current->next;
   }
 }
@@ -53,7 +50,7 @@ void print_footer()
   sprintf(cursor_position,
           "Line: %d Column: %d",
           g_state.top_line_number + g_state.cursor_Y,
-          g_state.cursor_X);
+          g_state.pos_X + 1);
 
   wattron(footer, A_BOLD);
   mvwprintw(footer, 

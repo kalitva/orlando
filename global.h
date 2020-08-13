@@ -6,14 +6,13 @@
 
 
 struct s_state {
+  int screen_rows;
+  int screen_cols;
   int cursor_X;
   int cursor_Y;
   int pos_X;
-  int pos_Y;
-  int screen_rows;
-  int screen_cols;
-  node_t *top_line;
   int top_line_number;
+  node_t *top_line;
   bool is_new_file;
   bool dirty;
   char *file_name;

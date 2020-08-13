@@ -20,11 +20,12 @@ int pop(stack_t *);
 int peek(stack_t *);
 
 
-static stack_t *stack;
+static stack_t *brackets;
 
-void init_stack()
+
+void init_brackets_stack()
 {
-  stack = new_stack();
+  brackets = new_stack();
 }
 
 int is_separator(int ch)
@@ -57,19 +58,19 @@ void insert(int ch)
   int closing_char;
   int previous_char;
 
-  previous_char = peek(stack);
+  previous_char = peek(brackets);
 
   if (is_opening_char(ch) && previous_char != '"' && previous_char != '\'') {
 
     insert_char(ch);
     cursor_to_right();
     insert_char(closing_char = get_closing_char(ch));
-    push(stack, closing_char);
+    push(brackets, closing_char);
 
   } else if (ch == previous_char) {
 
     cursor_to_right();
-    pop(stack);
+    pop(brackets);
 
   } else {  
 
@@ -80,11 +81,22 @@ void insert(int ch)
 
 void insert_tab()
 {
-  int tab_size = g_config.tab_size;
+  int tab_size;
+  line_t *line;
 
-  while (tab_size--) {
-    insert_char(' ');
-    cursor_to_right();
+  if (g_config.is_spaces_instead_tab) {
+
+		tab_size = g_config.tab_size;
+	  while (tab_size--) {
+ 	    insert_char(' ');
+    	cursor_to_right();
+	  }
+
+  } else {
+
+  	line = g_lines->head->value;
+  	insert_char('\t');
+  	cursor_to_right();
   }
 }
 
@@ -93,7 +105,7 @@ void indentation()
   line_t *previous;
   int offset = 0;
 
-  if (!g_lines->head->previous) {
+  if (!g_lines->head->previous || !g_config.is_spaces_instead_tab) {
   	insert_tab();
     return;
   }
